@@ -5,13 +5,13 @@ sys.path.append(os.path.abspath('../src'))
 sys.path.append(os.path.abspath('src'))
 import fastpotential as fs
 
-a1 = np.zeros((3,3), dtype="complex")
+a1 = np.zeros((3,3), dtype=np.cdouble)
 a1[0,0] = 1.0
 a1[2,2] = 4.0
-a2 = np.zeros((3,3),dtype="complex")
+a2 = np.zeros((3,3),dtype=np.cdouble)
 a2[0,0] = 2.0
 a2[2,2] = 5.0
-res = np.zeros((3,3),dtype="complex")
+res = np.zeros((3,3),dtype=np.cdouble)
 
 
 

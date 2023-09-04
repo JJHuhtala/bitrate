@@ -5,6 +5,7 @@ import sys
 import os
 sys.path.append(os.path.abspath('src'))
 import fastpotential as ts
+import wavefunc as w
 from utils import find_nearest,x_deriv, y_deriv, create_wall, Y
 #If you have ffmpeg, you can use this and the two lines at the bottom to save an animation
 #plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
@@ -22,25 +23,20 @@ def update_psi_rk4(psi, dt):
 
 #Parameters here. We are using atomic units. 
 L         = 8
-Npoints   = 201   
+Npoints   = 201
 sigma     = 1./4.
 x         = np.linspace(-L, L, Npoints)
 y         = np.linspace(-L, L, Npoints)
 dx        = x[1]-x[0]
 time_unit = 2.4188843265857e-17
 timestep  = 0.001
-psi       = np.zeros((Npoints,Npoints), dtype=complex)
+psi       = np.zeros((Npoints,Npoints), dtype=np.cdouble)
 kx        = -1000.0
-V         = np.zeros((Npoints,Npoints))
-dirac     = 1/dx*np.ones(Npoints)
+V         = np.zeros((Npoints,Npoints),dtype=np.cdouble)
 A0        = 5/2
-V[150,:] = dirac
-V[:,150] = dirac
 V[:,:]   = 0.0
-#for i in range(Npoints):
-#    for j in range(Npoints):
-#        V[i,j] = 1/dx**2*(+i*dx-j*dx)**2
-# Initialize and normalize psi.
+
+
 for i in range(Npoints):
     for j in range(Npoints):
         psi[i,j] = 0.7*Y(x[i],1.0,1.0,np.pi/2,A0)*Y(x[j],1.0,1.0,np.pi/2,A0) + 0.7*Y(x[i],1.0,1.0,np.pi+np.pi/2,A0)*Y(x[j],1.0,1.0,np.pi+np.pi/2,A0)
@@ -80,15 +76,22 @@ def animate(i):
     line.set_clim(vmin=0)
     return line
 
+ss = w.Schrödinger(psi,V,Npoints,4*1500,L)
+ss.simulate()
+def animate_2(i):
+    line = ss.animate(i)
+    return line
+    
 def init():
     return line
 
 #show or animate
-
-ani = animation.FuncAnimation(fig, animate, np.arange(1, 1500), init_func=init,
+ss.create_movie()
+"""
+ani = animation.FuncAnimation(fig, animate_2, np.arange(1, 1500), init_func=init,
                               interval=25, save_count=1500)
 #plt.show()
 FFwriter=animation.FFMpegWriter(fps=60, extra_args=['-vcodec', 'libx264'])
 ani.save('psiresonance.mp4', writer = FFwriter)
-
+"""
 #plt.show()

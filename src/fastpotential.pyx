@@ -63,18 +63,18 @@ cpdef void rk4(complex[:,:,:] psis, complex[:,:] V, Py_ssize_t Nsteps, Py_ssize_
     # This function is ugly as all hell since I've tried to explicitly avoid allocations to save time
 
     # Preliminary setup: I use numpy arrays since they're easy to create. Could use C arrays.
-    halfstepar = np.zeros((N,N),dtype=complex)
-    fullstepar = np.zeros((N,N),dtype=complex)
-    laplacear = np.zeros((N,N), dtype=complex)
+    halfstepar = np.zeros((N,N),dtype=np.cdouble)
+    fullstepar = np.zeros((N,N),dtype=np.cdouble)
+    laplacear = np.zeros((N,N), dtype=np.cdouble)
 
-    k1ar = np.zeros((N,N),dtype=complex)
-    k2ar = np.zeros((N,N),dtype=complex)
-    k3ar = np.zeros((N,N),dtype=complex)
-    k4ar = np.zeros((N,N),dtype=complex)
+    k1ar = np.zeros((N,N),dtype=np.cdouble)
+    k2ar = np.zeros((N,N),dtype=np.cdouble)
+    k3ar = np.zeros((N,N),dtype=np.cdouble)
+    k4ar = np.zeros((N,N),dtype=np.cdouble)
 
-    Vjar =np.zeros((N,N),dtype=complex)
-    Vjmultiar = np.zeros((N,N),dtype=complex)
-    multikar = np.zeros((N,N), dtype=complex)
+    Vjar =np.zeros((N,N),dtype=np.cdouble)
+    Vjmultiar = np.zeros((N,N),dtype=np.cdouble)
+    multikar = np.zeros((N,N), dtype=np.cdouble)
     cdef complex [:,:] halfstep = halfstepar
     cdef complex [:,:] fullstep = fullstepar
     cdef complex [:,:] laplace = laplacear
@@ -89,7 +89,7 @@ cpdef void rk4(complex[:,:,:] psis, complex[:,:] V, Py_ssize_t Nsteps, Py_ssize_
     cdef double halfstepconst
     halfstepconst = 0.5 * dt
 
-    for i in range(1,N):
+    for i in range(1,Nsteps):
         laplace_multi(psis[:,:,i-1],laplace,N,dx)  # Calculating the k1 step
         multiply(psis[:,:,i-1],Vj,Vjmulti,N)
         add(laplace,Vjmulti,k1,N)  # Calculating the k1 step; need to add the potential properly here. (Currently assumes 0!)
@@ -124,6 +124,8 @@ cpdef void rk4(complex[:,:,:] psis, complex[:,:] V, Py_ssize_t Nsteps, Py_ssize_
         add(k1,multik,k2,N)
         add(k2,laplace,k3,N)
         add(k3,psis[:,:,i-1],psis[:,:,i],N)
+        if i%10 == 0:
+            print(i)
 
 
 cpdef np.ndarray[complex,ndim=2] create_gaussian(int N, np.ndarray x, np.ndarray y, double centerx, double centery, double factor,double sigma):
