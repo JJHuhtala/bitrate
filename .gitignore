@@ -6,3 +6,4 @@ env/
 *.pyd
 src/*.c
 src/*.pyd
+.pytest_cache/
