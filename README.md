@@ -1,5 +1,6 @@
 install:
 
-python setup.py build_ext --inplace
+* pip install -r requirements.txt
+* python setup.py build_ext --inplace
 
-needs cython, FFMPEG for saving animations
+Needs FFMPEG for saving animations.

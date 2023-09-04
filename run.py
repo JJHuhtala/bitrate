@@ -51,7 +51,7 @@ fig, ax = plt.subplots()
 line = ax.imshow(np.abs(psi)**2,cmap='Greys')
 #line = ax.plot(np.imag(psi[]))3
 #line2 = ax.plot(np.real(Y(x,1.0,1.0,np.pi,A0)))
-print(Y(0.5,1.0,1.0,np.pi,A0))
+#print(Y(0.5,1.0,1.0,np.pi,A0))
 plt.xlabel(r'$x_1$')
 plt.ylabel(r'$x_2$')
 textheight = abs(np.max(psi))**2
@@ -67,7 +67,7 @@ def animate(i):
         psinew = update_psi_rk4(psi, timestep)
         psi = psinew
 
-    ax.patches = []
+    #ax.patches = []
     currentnorm = ts.get_norm(psi,Npoints,dx)
     #If the norm changes from 1 significantly, the simulation is probably in trouble.
     print(i,currentnorm)
