@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import sys
+import os
+sys.path.append(os.path.abspath('src'))
 import fastpotential as ts
 from utils import find_nearest,x_deriv, y_deriv, create_wall, Y
 #If you have ffmpeg, you can use this and the two lines at the bottom to save an animation
