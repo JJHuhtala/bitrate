@@ -11,7 +11,23 @@ cpdef double get_norm(np.ndarray[complex, ndim=2] psi,int N, double dx):
             norm = norm + pow(abs(psi[i,j]),2)*dx*dx
     return norm
 
+cpdef void multiply_by_constant_test(complex[:,:] a1, complex[:,:] res, double complex c, Py_ssize_t N):
+    multiply_by_constant(a1, res, c, N)
+cdef void multiply_by_constant(complex[:,:] a1, complex[:,:] res, double complex c, Py_ssize_t N):
+    for i in range(N):
+        for j in range(N):
+            res[i,j] = c*a1[i,j]
 
+
+cpdef void add_test(complex[:,:] a1, complex[:,:] a2, complex[:,:] result, Py_ssize_t N):
+    add(a1,a2,result,N)
+cdef void add(complex[:,:] a1, complex[:,:] a2, complex[:,:] result, Py_ssize_t N):
+    cdef Py_ssize_t i, j
+    for i in range(N):
+        for j in range(N):
+            result[i,j] = a1[i,j] + a2[i,j]
+    
+# Dummy function to allow testing: cpdef functions have overhead even when called from C.
 
 cpdef np.ndarray[complex,ndim=2] laplace(np.ndarray[complex,ndim=2] psi,int N, double dx):
     cdef np.ndarray[complex,ndim=2] laplace

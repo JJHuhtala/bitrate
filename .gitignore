@@ -4,3 +4,5 @@ build/
 env/
 *.c
 *.pyd
+src/*.c
+src/*.pyd

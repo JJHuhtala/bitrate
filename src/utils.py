@@ -34,6 +34,8 @@ def create_wall(Npoints,x,y):
     for i in range(len(droploc)):
         Vdrop = Vdrop + ts.create_gaussian(Npoints,x,y,xdroploc,droploc[i],-factorpot/10,sigmapot)
     return V+Vdrop
+def particle_in_2d_box(L,x1,x2,n1,n2):
+    return 2/L * np.sin(x1*np.pi*n1/L) * np.sin(x2*np.pi*n2/L)
 def xi(sigma, A0):
     return 0.5*np.abs(A0)**2*np.sin(-2*sigma)
 def Y(x,m,omega,sigma,A0):
