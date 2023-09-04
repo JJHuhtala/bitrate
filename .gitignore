@@ -1,5 +1,5 @@
 __pycache__/
 *.mp4
 build/
-venv/
+env/
 *.c
