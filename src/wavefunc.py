@@ -19,7 +19,6 @@ class Schrödinger():
         self.line = self.ax.imshow(np.abs(self.psis[:,:,0])**2,cmap='Greys')
     def simulate(self):
         f.rk4(self.psis,self.V,self.Nt,self.Np,self.L/self.Np, self.dt)
-        print(np.max(self.psis[:,:,0]-self.psis[:,:,300]))
     def beg(self):
         return self.line
     def animate(self,i):
@@ -38,4 +37,9 @@ class Schrödinger():
                               interval=25, save_count=1500)
         FFwriter=animation.FFMpegWriter(fps=60, extra_args=['-vcodec', 'libx264'])
         ani.save('psiresonance.mp4', writer = FFwriter)
-        
+    
+    def get_grid(self):
+        return self.Nt, self.Np,self.L,self.x1,self.dt
+    
+    def get_psis(self):
+        return self.psis

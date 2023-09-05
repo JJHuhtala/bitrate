@@ -7,6 +7,8 @@ sys.path.append(os.path.abspath('src'))
 import fastpotential as ts
 import wavefunc as w
 from utils import find_nearest,x_deriv, y_deriv, create_wall, Y
+from scipy import stats
+from bohmian import BohmianSimulation
 #If you have ffmpeg, you can use this and the two lines at the bottom to save an animation
 #plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
  
@@ -44,9 +46,20 @@ norm = ts.get_norm(psi,Npoints,dx)
 #print(norm)
 psi = psi/np.sqrt(norm)
 #Initial particle position
-
+custm = stats.rv_discrete(name='custm', values=(np.arange(Npoints*Npoints).reshape((Npoints,Npoints)), np.abs(psi)**2*dx*dx))
+R = custm.rvs(size=1000)
+Rx = np.array([np.count_nonzero(R==y) for y in np.arange(Npoints*Npoints)])
+Rxs = Rx.reshape((Npoints,Npoints))
+#plt.imshow(Rxs)
+cc = 0
+for i in range(len(Rxs[0,:])):
+    for j in range(len(Rxs[0,:])):
+        if Rxs[i,j] != 0:
+            print("Not zero ij, x1: ", x[i], " and x2: ", x[j])
+            cc += 1
+print(cc)
 # Set up figure.
-fig, ax = plt.subplots()
+"""fig, ax = plt.subplots()
 line = ax.imshow(np.abs(psi)**2,cmap='Greys')
 #line = ax.plot(np.imag(psi[]))3
 #line2 = ax.plot(np.real(Y(x,1.0,1.0,np.pi,A0)))
@@ -56,10 +69,11 @@ plt.ylabel(r'$x_2$')
 textheight = abs(np.max(psi))**2
 plt.title(r'Wave function')
 rk4_steps_per_frame = 4
-plt.show()
-
+plt.show()"""
+#plt.clf()
+#plt.cla()
 #Animate everything
-
+"""
 def animate(i):
     global psi
     for q in range(rk4_steps_per_frame):
@@ -74,10 +88,15 @@ def animate(i):
     line.set_data(plotted)  # update the data
     line.set_clim(vmax=np.amax(np.abs(psi)**2))
     line.set_clim(vmin=0)
-    return line
+    return line"""
 
 ss = w.Schrödinger(psi,V,Npoints,4*1500,L)
 ss.simulate()
+print("SCHRD solved, next Bohmian.. ")
+Nt, Np, L, x, dt = ss.get_grid()
+bb = BohmianSimulation(ss.get_psis(),x,Np,Nt, dt)
+bb.calculate_trajectories()
+
 def animate_2(i):
     line = ss.animate(i)
     return line
@@ -86,7 +105,7 @@ def init():
     return line
 
 #show or animate
-ss.create_movie()
+#ss.create_movie()
 """
 ani = animation.FuncAnimation(fig, animate_2, np.arange(1, 1500), init_func=init,
                               interval=25, save_count=1500)

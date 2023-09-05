@@ -7,3 +7,4 @@ env/
 src/*.c
 src/*.pyd
 .pytest_cache/
+*.npy
