@@ -32,6 +32,9 @@ class Trajectory():
     def get_trajectory(self):
         return np.array(self.traj)
 
+    def get_weight(self):
+        return self.weight
+
 class BohmianSimulation():
     def __init__(self,psis,x, Np, Nt, dt, Ntraj = 1000):
         self.psis = psis
@@ -61,6 +64,7 @@ class BohmianSimulation():
         traj_xs = []
         for i in trajectories:
             i.compute_trajectory()
-            traj_xs.append(i.get_trajectory())
+            for k in range(i.get_weight()):
+                traj_xs.append(i.get_trajectory())
         
         np.save("testtraj.npy",np.array(traj_xs))

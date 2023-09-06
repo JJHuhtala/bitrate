@@ -24,8 +24,8 @@ def update_psi_rk4(psi, dt):
     return psinew
 
 #Parameters here. We are using atomic units. 
-L         = 8
-Npoints   = 201
+L         = 25
+Npoints   = 628
 sigma     = 1./4.
 x         = np.linspace(-L, L, Npoints)
 y         = np.linspace(-L, L, Npoints)
@@ -33,11 +33,10 @@ dx        = x[1]-x[0]
 time_unit = 2.4188843265857e-17
 timestep  = 0.001
 psi       = np.zeros((Npoints,Npoints), dtype=np.cdouble)
-kx        = -1000.0
 V         = np.zeros((Npoints,Npoints),dtype=np.cdouble)
 A0        = 5/2
-V[:,:]   = 0.0
-
+V[:,100]  = 100.0
+V[100,:]  = 100.0
 
 for i in range(Npoints):
     for j in range(Npoints):
@@ -90,11 +89,11 @@ def animate(i):
     line.set_clim(vmin=0)
     return line"""
 
-ss = w.Schrödinger(psi,V,Npoints,4*1500,L)
+ss = w.Schrödinger(psi,V,Npoints,4*450,L)
 ss.simulate()
 print("SCHRD solved, next Bohmian.. ")
 Nt, Np, L, x, dt = ss.get_grid()
-bb = BohmianSimulation(ss.get_psis(),x,Np,Nt, dt)
+bb = BohmianSimulation(ss.get_psis(),x,Np,Nt, dt, Ntraj=10000)
 bb.calculate_trajectories()
 
 def animate_2(i):
@@ -105,6 +104,7 @@ def init():
     return line
 
 #show or animate
+#print("Creating animation..")
 #ss.create_movie()
 """
 ani = animation.FuncAnimation(fig, animate_2, np.arange(1, 1500), init_func=init,

@@ -44,10 +44,6 @@ cpdef np.ndarray[complex,ndim=2] laplace(np.ndarray[complex,ndim=2] psi,int N, d
         for j in range(1,N-1):
             laplace[i,j] = (psi[i+1,j] + psi[i-1,j] + psi[i,j-1] +\
                                 psi[i,j+1] - 4. * psi[i,j]) / (dx * dx)
-    laplace[0,:]         = 0
-    laplace[N-1,:]       = 0  
-    laplace[:,0]         = 0
-    laplace[:,N-1]       = 0
     return laplace
 
 cpdef void laplace_multi(complex[:,:] psi, complex[:,:] laplace, Py_ssize_t N, double dx):
