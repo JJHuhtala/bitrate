@@ -6,22 +6,11 @@ import os
 sys.path.append(os.path.abspath('src'))
 import fastpotential as ts
 import wavefunc as w
-from utils import find_nearest,x_deriv, y_deriv, create_wall, Y
+from utils import Y
 from scipy import stats
 from bohmian import BohmianSimulation
 #If you have ffmpeg, you can use this and the two lines at the bottom to save an animation
 #plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
- 
-# Update psi using a single RK4 step with timestep dt.
-
-def update_psi_rk4(psi, dt):
-    k1 = -(1. / (2.j)) * ts.laplace(psi,Npoints,dx) + (1. / 1.j)*V*(psi)
-    k2 = -(1. / (2.j)) * ts.laplace(psi + 0.5 * dt * k1,Npoints,dx)+ (1. / 1.j)*V*(psi + 0.5 * dt * k1)
-    k3 = -(1. / (2.j)) * ts.laplace(psi + 0.5 * dt * k2,Npoints,dx)+ (1. / 1.j)*V*(psi + 0.5 * dt * k2)
-    k4 = -(1. / (2.j)) * ts.laplace(psi + dt * k3,Npoints,dx)+ (1. / 1.j)*V*(psi + dt * k3)
-     
-    psinew = psi + dt * 1. / 6. * (k1 + 2. * k2 + 2. * k3 + k4)
-    return psinew
 
 #Parameters here. We are using atomic units. 
 L         = 25
@@ -37,13 +26,55 @@ V         = np.zeros((Npoints,Npoints),dtype=np.cdouble)
 A0        = 5/2
 V[:,100]  = 100.0
 V[100,:]  = 100.0
+num_basis_funcs = 40
 
 for i in range(Npoints):
     for j in range(Npoints):
         psi[i,j] = 0.7*Y(x[i],1.0,1.0,np.pi/2,A0)*Y(x[j],1.0,1.0,np.pi/2,A0) + 0.7*Y(x[i],1.0,1.0,np.pi+np.pi/2,A0)*Y(x[j],1.0,1.0,np.pi+np.pi/2,A0)
+
+def psi_cont(x,y):
+    return np.abs(0.7*Y(x,1.0,1.0,np.pi/2,A0)*Y(y,1.0,1.0,np.pi/2,A0) + 0.7*Y(x,1.0,1.0,np.pi+np.pi/2,A0)*Y(y,1.0,1.0,np.pi+np.pi/2,A0))**2
 norm = ts.get_norm(psi,Npoints,dx)
-#print(norm)
 psi = psi/np.sqrt(norm)
+from scipy.stats import rv_continuous
+
+class entangled_gen(rv_continuous):
+
+    "Gaussian distribution"
+
+    def _pdf(self, x,y):
+
+        return psi_cont(x,y)
+#print(norm)
+
+def integral(fun1,fun2):
+    return np.sum(fun1 * fun2 * dx * dx)
+
+
+def E(n1,n2):
+    return (n1**2+n2**2)*(np.pi**2)/(2*L**2)
+
+coeffs = np.zeros((num_basis_funcs,num_basis_funcs),dtype=complex)
+print("Starting coeffs")
+for i in range(num_basis_funcs):
+    for j in range(num_basis_funcs):
+        bs = ts.basis2d(x,y,L,i,j,Npoints)
+        coeffs[i,j] = integral(bs,psi)
+        if i%10 == 0 and j==0:
+            print(i)
+
+
+funbasis = np.zeros((Npoints,Npoints),dtype=complex)
+
+for i in range(num_basis_funcs):
+    for j in range(num_basis_funcs):
+        funbasis += coeffs[i,j]*ts.basis2d(x,y,L,i,j,Npoints)*np.exp(-1.0j * E(i,j)* 3.0)
+
+
+plt.imshow(np.abs(funbasis)**2)
+plt.show()
+
+
 #Initial particle position
 custm = stats.rv_discrete(name='custm', values=(np.arange(Npoints*Npoints).reshape((Npoints,Npoints)), np.abs(psi)**2*dx*dx))
 R = custm.rvs(size=1000)
@@ -51,12 +82,7 @@ Rx = np.array([np.count_nonzero(R==y) for y in np.arange(Npoints*Npoints)])
 Rxs = Rx.reshape((Npoints,Npoints))
 #plt.imshow(Rxs)
 cc = 0
-for i in range(len(Rxs[0,:])):
-    for j in range(len(Rxs[0,:])):
-        if Rxs[i,j] != 0:
-            print("Not zero ij, x1: ", x[i], " and x2: ", x[j])
-            cc += 1
-print(cc)
+
 # Set up figure.
 """fig, ax = plt.subplots()
 line = ax.imshow(np.abs(psi)**2,cmap='Greys')
@@ -72,6 +98,14 @@ plt.show()"""
 #plt.clf()
 #plt.cla()
 #Animate everything
+
+#bb = BohmianSimulation(ss.get_psis(),x,Np,Nt, dt, Ntraj=10000)
+#bb.calculate_trajectories()
+
+
+
+# Animation tools not used for now
+
 """
 def animate(i):
     global psi
@@ -88,24 +122,6 @@ def animate(i):
     line.set_clim(vmax=np.amax(np.abs(psi)**2))
     line.set_clim(vmin=0)
     return line"""
-
-ss = w.Schrödinger(psi,V,Npoints,4*450,L)
-ss.simulate()
-print("SCHRD solved, next Bohmian.. ")
-Nt, Np, L, x, dt = ss.get_grid()
-bb = BohmianSimulation(ss.get_psis(),x,Np,Nt, dt, Ntraj=10000)
-bb.calculate_trajectories()
-
-def animate_2(i):
-    line = ss.animate(i)
-    return line
-    
-def init():
-    return line
-
-#show or animate
-#print("Creating animation..")
-#ss.create_movie()
 """
 ani = animation.FuncAnimation(fig, animate_2, np.arange(1, 1500), init_func=init,
                               interval=25, save_count=1500)

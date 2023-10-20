@@ -1,6 +1,8 @@
 from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
+
+# Load presaved trajectories. 
 a = np.load("testtraj.npy")
 print(len(a[0,:,0]))
 flighttimes = []

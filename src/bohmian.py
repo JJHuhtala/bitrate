@@ -53,7 +53,7 @@ class BohmianSimulation():
     def calculate_trajectories(self):
         R = self.generate_initial_distribution()
         Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
-        Rxs = Rx.reshape((self.Np,self.Np))
+        Rxs = Rx.reshape((self.Np,self.Np)) # This now contains how many 
         trajectories = []
         for i in range(len(Rxs[0,:])):
             for j in range(len(Rxs[0,:])):
