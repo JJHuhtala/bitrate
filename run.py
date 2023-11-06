@@ -56,19 +56,24 @@ def E(n1,n2):
 
 coeffs = np.zeros((num_basis_funcs,num_basis_funcs),dtype=complex)
 print("Starting coeffs")
+"""
 for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
         bs = ts.basis2d(x,y,L,i,j,Npoints)
         coeffs[i,j] = integral(bs,psi)
         if i%10 == 0 and j==0:
             print(i)
-
+"""
 
 funbasis = np.zeros((Npoints,Npoints),dtype=complex)
 
 for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
-        funbasis += coeffs[i,j]*ts.basis2d(x,y,L,i,j,Npoints)*np.exp(-1.0j * E(i,j)* 3.0)
+        for k in range(Npoints):
+            for l in range(Npoints):
+                funbasis[k,l] += coeffs[i,j]*ts.basis2d_pw(x,L,i,j,k,l,Npoints)*np.exp(-1.0j * E(i,j)* 3.0)
+    
+    print(i)
 
 
 plt.imshow(np.abs(funbasis)**2)
