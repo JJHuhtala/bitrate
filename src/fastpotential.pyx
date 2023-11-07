@@ -21,21 +21,33 @@ cpdef double get_norm(np.ndarray[complex, ndim=2] psi,int N, double dx):
         for j in range(N):
             norm = norm + pow(abs(psi[i,j]),2)*dx*dx
     return norm
-cdef basis2d_c():
-    pass
+cdef basisfunc(double x, double y, double L, int n1, int n2):
+    cdef double k1,k2
+    k1 = np.pi*n1/(2*L)
+    k2 = np.pi*n2/(2*L)
+    return 2/L * sin(k1*(x+L))*sin(k2*(y+L))
 
-def basis2d_pw(double[:] x, double L, int n1, int n2, int i, int j, int N):
-    cdef double k1,k2 
-    k1 = np.pi*n1/L
-    k2 = np.pi*n2/L
-    return 2/L * sin(k1*(x[i]+L/2))*sin(k2*(x[j]+L/2)) 
 def basis2d(double[:] x, double[:] y, double L, int n1, int n2, int N):
     cdef Py_ssize_t i, j
     cdef double k1,k2 
-    k1 = np.pi*n1/L
-    k2 = np.pi*n2/L
+    k1 = np.pi*n1/(2*L)
+    k2 = np.pi*n2/(2*L)
     bs = np.zeros((N,N),dtype=complex)
     for i in range(N):
         for j in range(N):
-            bs[i,j] = 2/L * sin(k1*(x[i]+L/2))*sin(k2*(x[j]+L/2))
+            bs[i,j] = basisfunc(x[i],x[j],L,n1,n2)
     return bs
+
+
+def basis2d_xderiv(double x, double y, double L, int n1, int n2, int N):
+    cdef Py_ssize_t i, j
+    cdef double k1,k2, bs
+    k1 = np.pi*n1/(2*L)
+    k2 = np.pi*n2/(2*L)
+    bs = 0
+    """
+    for i in range(N):
+        for j in range(N):
+            bs[i,j] = 2/L * sin(k1*(x[i]+L))*sin(k2*(x[j]+L))"""
+    return bs
+

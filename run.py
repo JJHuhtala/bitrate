@@ -52,26 +52,23 @@ def integral(fun1,fun2):
 
 
 def E(n1,n2):
-    return (n1**2+n2**2)*(np.pi**2)/(2*L**2)
+    return (n1**2+n2**2)*(np.pi**2)/(2*(2*L)**2)
 
 coeffs = np.zeros((num_basis_funcs,num_basis_funcs),dtype=complex)
 print("Starting coeffs")
-"""
+
 for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
         bs = ts.basis2d(x,y,L,i,j,Npoints)
         coeffs[i,j] = integral(bs,psi)
-        if i%10 == 0 and j==0:
-            print(i)
+    print(i)
+np.savetxt("coeffs_nowall.txt",coeffs)
 """
-
 funbasis = np.zeros((Npoints,Npoints),dtype=complex)
 
 for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
-        for k in range(Npoints):
-            for l in range(Npoints):
-                funbasis[k,l] += coeffs[i,j]*ts.basis2d_pw(x,L,i,j,k,l,Npoints)*np.exp(-1.0j * E(i,j)* 3.0)
+        funbasis += coeffs[i,j]*ts.basis2d(x,L,i,j,Npoints)*np.exp(-1.0j * E(i,j)* 3.0)
     
     print(i)
 
@@ -86,7 +83,7 @@ R = custm.rvs(size=1000)
 Rx = np.array([np.count_nonzero(R==y) for y in np.arange(Npoints*Npoints)])
 Rxs = Rx.reshape((Npoints,Npoints))
 #plt.imshow(Rxs)
-cc = 0
+cc = 0"""
 
 # Set up figure.
 """fig, ax = plt.subplots()
