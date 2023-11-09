@@ -33,46 +33,34 @@ import fastpotential as fp
 from utils import find_nearest,x_deriv, y_deriv
 class Trajectory():
 
-    r&#34;&#34;&#34;A one-line summary that does not use variable names or the
-    function name.
-
-    Several sentences providing an extended description. Refer to
-    variables using back-ticks, e.g. `var`.
+    &#34;&#34;&#34;A class describing a single Bohmian trajectory with a given weight.
 
     Parameters
     ----------
-    var1 : array_like
-        Array_like means all those objects -- lists, nested lists, etc. --
-        that can be converted to an array.  We can also refer to
-        variables like `var1`.
-    var2 : int
-        The type above can either refer to an actual Python type
-        (e.g. ``int``), or describe the type of the variable in more
-        detail, e.g. ``(N,) ndarray`` or ``array_like``.
-    long_var_name : {&#39;hi&#39;, &#39;ho&#39;}, optional
-        Choices in brackets, default first when optional.
-
-    Returns
-    -------
-    type
-        Explanation of anonymous return value of type ``type``.
-    describe : type
-        Explanation of return value named `describe`.
-    out : type
-        Explanation of `out`.
-    type_without_description
-
-    Other Parameters
-    ----------------
-    only_seldom_used_keywords : type
-        Explanation
-    common_parameters_listed_above : type
-        Explanation
+    psi0 : 2 dimensional complex ndarray
+        The initial wave function to start the simulation from.
+    x : 1 dimensional double ndarray
+        The grid points for the box along one dimensional. The other dimension is forced to be the same
+    L : double
+        Half the length of the box.
+    coeffs : 2 dimensional complex ndarray
+        The coefficients for the basis expansion of psi.
+    Nt : integer
+        Number of timesteps to take
+    dt : double
+        Size of the timestep
+    startind : integer tuple
+        The starting position index from the x-array. 
+    weight : integer
+        How many trajectories start from the same index.
+    
+    Notes
+    -----
+    The class computes the trajectory only on command; by default, it contains some information about the weight of the trajectory
+    (i.e. how many times the particle started in the initial position), the inital wave function and the coefficient required for
+    the expansion. 
     &#34;&#34;&#34;
     def __init__(self, psi0, x, L, coeffs, Nt, dt, startind, weight):
-        &#34;&#34;&#34;
-        here&#39;s a random docs
-        &#34;&#34;&#34;
         self.weight = weight
         self.x = x
         self.pos = np.array([x[startind[0]],x[startind[1]]])
@@ -98,27 +86,87 @@ class Trajectory():
         k2 = np.nan_to_num((y_deriv(psi,xcoord,ycoord,self.dx)/psi[xcoord,ycoord]).imag )
         return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
 
-    def euler_step_cython(self,step):
+    def euler_step_cython(self):
+        &#34;&#34;&#34;Take Euler method step in the trajectory calculation.
+
+        Returns
+        -------
+        pos : tuple (double)
+            The new coordinates of the particle in (x1,x2) space.
+
+        &#34;&#34;&#34;
         x1 = self.pos[0]
         x2 = self.pos[1]
         psi = 0
         k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag  )
         k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag )
+        return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
+    
     def compute_trajectory(self):
+        &#34;&#34;&#34;Computes the trajectory for Nt time steps.
+        
+        Notes
+        -----
+        This is an internal function that modifies the trajectory self.traj. That variable contains
+        as a numpy array the positions of the particle at each timestamp.
+        &#34;&#34;&#34;
         for i in range(self.Nt):
             self.pos = self.euler_step(i)
             self.traj.append(np.copy(self.pos))
 
     def get_trajectory(self):
+        &#34;&#34;&#34;Returns the trajectory as a numpy array.
+        
+        Returns
+        -------
+        traj : 2 dimensional ndarray
+            The trajectory.
+        &#34;&#34;&#34;
         return np.array(self.traj)
 
     def get_weight(self):
+        &#34;&#34;&#34;Returns the weight of this trajectory
+        
+        Returns
+        -------
+        weight : integer
+            The weight of the trajectory, i.e. how many times the particle started at this position.
+        &#34;&#34;&#34;
         return self.weight
 
 class BohmianSimulation():
-    def __init__(self,psi0, x, L, Np, Nt, dt, Ntraj = 1000, coeff_file=&#34;coeffs_nowall.txt&#34;):
+    &#34;&#34;&#34; A class containing a full Bohmian simulation. It simulates a given number of trajectories when given a coefficient file
+    for the basis expansion of the wave function. The trajectories are then saved in the file specified by &#34;output&#34; as a .npy 
+    file, loadable by numpy. The user should only call the constructor and calculate_trajectories.
+
+    Parameters
+    ----------
+    psi0 : 2 dimensional complex ndarray
+        The initial NORMALIZED wave function for the particles
+    x : 1 dimensional double ndarray
+        The grid points along one dimension, of length Np
+    L : double
+        Half the box length
+    Nt : integer
+        Number of time steps to take
+    dt : double
+        The length of the time step
+    Ntraj : integer
+        The number of trajectories to compute, given the initial distribution based on psi0
+    coeff_file : string
+        The .txt file containing the coefficients for the basis expansion of psi.
+    output : string
+        The output file, in to which the trajectories are dumped as a numpy array (which can be loaded with np.load).
+    
+    Notes
+    -----
+    This code draws from a discrete distribution of initial positions. This is basically equivalent
+    to binning the end result distribution, so you might as well do it beforehand. This saves some computation,
+    as trajectories starting at the same point need to only be calculated once.
+    &#34;&#34;&#34;
+    def __init__(self,psi0, x, L, Nt, dt, Ntraj = 1000, coeff_file=&#34;coeffs_nowall.txt&#34;, output=&#34;trajs.npy&#34;):
         self.psi0 = psi0
-        self.Np = Np
+        self.Np = len(x)
         self.x = x
         self.dx = x[1]-x[0]
         self.Ntraj = Ntraj
@@ -126,12 +174,34 @@ class BohmianSimulation():
         self.Nt = Nt
         self.L = L
         self.coeffs = np.loadtxt(coeff_file, dtype=complex)
+        self.output = output
     def generate_initial_distribution(self):
-        psi_init = self.psis[:,:,0] # The first in the list corresponds to the initial condition.
-        equilibrium = stats.rv_discrete(name=&#39;equilibrium&#39;, values=(np.arange(self.Np*self.Np).reshape((self.Np,self.Np)), np.abs(psi_init)**2*self.dx*self.dx))
+        &#34;&#34;&#34;Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
+        by perusing the rv_discrete documentation
+        
+        Returns
+        -------
+        dist 
+            The collection of indices randomly drawn based on the psi distribution, corresponding to initial starting positions.
+        
+        Notes
+        -----
+        Depends on the initial distribution being given, and thus shouldn&#39;t be called outside of the class.
+        &#34;&#34;&#34;
+        equilibrium = stats.rv_discrete(name=&#39;equilibrium&#39;, values=(np.arange(self.Np*self.Np).reshape((self.Np,self.Np)), np.abs(self.psi0)**2*self.dx*self.dx))
         return equilibrium.rvs(size=self.Ntraj)
 
     def calculate_trajectories(self):
+        &#34;&#34;&#34;Calculates Nt trajectories, giving them weights according to how many particles start at the same position in the initial
+        distribution.
+
+        Returns
+        -------
+        output : .npy file
+            The output is given in the form of a .npy file, which can then be later loaded with np.load.
+            The file is indexed such that arr[0,:,:] contains the first trajectory, with arr[0,:,0] containing
+            the sequence of x1 coordinates and arr[0,0,:] containing the x2 coordinates.
+        &#34;&#34;&#34;
         R = self.generate_initial_distribution()
         Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
         Rxs = Rx.reshape((self.Np,self.Np)) # This now contains how many 
@@ -148,7 +218,7 @@ class BohmianSimulation():
             for k in range(i.get_weight()):
                 traj_xs.append(i.get_trajectory())
         
-        np.save(&#34;testtraj.npy&#34;,np.array(traj_xs))
+        np.save(self.output,np.array(traj_xs))
 
 if __name__==&#34;__main__&#34;:
     pass</code></pre>
@@ -165,18 +235,72 @@ if __name__==&#34;__main__&#34;:
 <dl>
 <dt id="bohmian.BohmianSimulation"><code class="flex name class">
 <span>class <span class="ident">BohmianSimulation</span></span>
-<span>(</span><span>psi0, x, L, Np, Nt, dt, Ntraj=1000, coeff_file='coeffs_nowall.txt')</span>
+<span>(</span><span>psi0, x, L, Nt, dt, Ntraj=1000, coeff_file='coeffs_nowall.txt', output='trajs.npy')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A class containing a full Bohmian simulation. It simulates a given number of trajectories when given a coefficient file
+for the basis expansion of the wave function. The trajectories are then saved in the file specified by "output" as a .npy
+file, loadable by numpy. The user should only call the constructor and calculate_trajectories.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>psi0</code></strong> :&ensp;<code>2 dimensional complex ndarray</code></dt>
+<dd>The initial NORMALIZED wave function for the particles</dd>
+<dt><strong><code>x</code></strong> :&ensp;<code>1 dimensional double ndarray</code></dt>
+<dd>The grid points along one dimension, of length Np</dd>
+<dt><strong><code>L</code></strong> :&ensp;<code>double</code></dt>
+<dd>Half the box length</dd>
+<dt><strong><code>Nt</code></strong> :&ensp;<code>integer</code></dt>
+<dd>Number of time steps to take</dd>
+<dt><strong><code>dt</code></strong> :&ensp;<code>double</code></dt>
+<dd>The length of the time step</dd>
+<dt><strong><code>Ntraj</code></strong> :&ensp;<code>integer</code></dt>
+<dd>The number of trajectories to compute, given the initial distribution based on psi0</dd>
+<dt><strong><code>coeff_file</code></strong> :&ensp;<code>string</code></dt>
+<dd>The .txt file containing the coefficients for the basis expansion of psi.</dd>
+<dt><strong><code>output</code></strong> :&ensp;<code>string</code></dt>
+<dd>The output file, in to which the trajectories are dumped as a numpy array (which can be loaded with np.load).</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>This code draws from a discrete distribution of initial positions. This is basically equivalent
+to binning the end result distribution, so you might as well do it beforehand. This saves some computation,
+as trajectories starting at the same point need to only be calculated once.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BohmianSimulation():
-    def __init__(self,psi0, x, L, Np, Nt, dt, Ntraj = 1000, coeff_file=&#34;coeffs_nowall.txt&#34;):
+    &#34;&#34;&#34; A class containing a full Bohmian simulation. It simulates a given number of trajectories when given a coefficient file
+    for the basis expansion of the wave function. The trajectories are then saved in the file specified by &#34;output&#34; as a .npy 
+    file, loadable by numpy. The user should only call the constructor and calculate_trajectories.
+
+    Parameters
+    ----------
+    psi0 : 2 dimensional complex ndarray
+        The initial NORMALIZED wave function for the particles
+    x : 1 dimensional double ndarray
+        The grid points along one dimension, of length Np
+    L : double
+        Half the box length
+    Nt : integer
+        Number of time steps to take
+    dt : double
+        The length of the time step
+    Ntraj : integer
+        The number of trajectories to compute, given the initial distribution based on psi0
+    coeff_file : string
+        The .txt file containing the coefficients for the basis expansion of psi.
+    output : string
+        The output file, in to which the trajectories are dumped as a numpy array (which can be loaded with np.load).
+    
+    Notes
+    -----
+    This code draws from a discrete distribution of initial positions. This is basically equivalent
+    to binning the end result distribution, so you might as well do it beforehand. This saves some computation,
+    as trajectories starting at the same point need to only be calculated once.
+    &#34;&#34;&#34;
+    def __init__(self,psi0, x, L, Nt, dt, Ntraj = 1000, coeff_file=&#34;coeffs_nowall.txt&#34;, output=&#34;trajs.npy&#34;):
         self.psi0 = psi0
-        self.Np = Np
+        self.Np = len(x)
         self.x = x
         self.dx = x[1]-x[0]
         self.Ntraj = Ntraj
@@ -184,12 +308,34 @@ if __name__==&#34;__main__&#34;:
         self.Nt = Nt
         self.L = L
         self.coeffs = np.loadtxt(coeff_file, dtype=complex)
+        self.output = output
     def generate_initial_distribution(self):
-        psi_init = self.psis[:,:,0] # The first in the list corresponds to the initial condition.
-        equilibrium = stats.rv_discrete(name=&#39;equilibrium&#39;, values=(np.arange(self.Np*self.Np).reshape((self.Np,self.Np)), np.abs(psi_init)**2*self.dx*self.dx))
+        &#34;&#34;&#34;Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
+        by perusing the rv_discrete documentation
+        
+        Returns
+        -------
+        dist 
+            The collection of indices randomly drawn based on the psi distribution, corresponding to initial starting positions.
+        
+        Notes
+        -----
+        Depends on the initial distribution being given, and thus shouldn&#39;t be called outside of the class.
+        &#34;&#34;&#34;
+        equilibrium = stats.rv_discrete(name=&#39;equilibrium&#39;, values=(np.arange(self.Np*self.Np).reshape((self.Np,self.Np)), np.abs(self.psi0)**2*self.dx*self.dx))
         return equilibrium.rvs(size=self.Ntraj)
 
     def calculate_trajectories(self):
+        &#34;&#34;&#34;Calculates Nt trajectories, giving them weights according to how many particles start at the same position in the initial
+        distribution.
+
+        Returns
+        -------
+        output : .npy file
+            The output is given in the form of a .npy file, which can then be later loaded with np.load.
+            The file is indexed such that arr[0,:,:] contains the first trajectory, with arr[0,:,0] containing
+            the sequence of x1 coordinates and arr[0,0,:] containing the x2 coordinates.
+        &#34;&#34;&#34;
         R = self.generate_initial_distribution()
         Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
         Rxs = Rx.reshape((self.Np,self.Np)) # This now contains how many 
@@ -206,7 +352,7 @@ if __name__==&#34;__main__&#34;:
             for k in range(i.get_weight()):
                 traj_xs.append(i.get_trajectory())
         
-        np.save(&#34;testtraj.npy&#34;,np.array(traj_xs))</code></pre>
+        np.save(self.output,np.array(traj_xs))</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -214,12 +360,30 @@ if __name__==&#34;__main__&#34;:
 <span>def <span class="ident">calculate_trajectories</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Calculates Nt trajectories, giving them weights according to how many particles start at the same position in the initial
+distribution.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>output</code></strong> :&ensp;<code>.npy file</code></dt>
+<dd>The output is given in the form of a .npy file, which can then be later loaded with np.load.
+The file is indexed such that arr[0,:,:] contains the first trajectory, with arr[0,:,0] containing
+the sequence of x1 coordinates and arr[0,0,:] containing the x2 coordinates.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def calculate_trajectories(self):
+    &#34;&#34;&#34;Calculates Nt trajectories, giving them weights according to how many particles start at the same position in the initial
+    distribution.
+
+    Returns
+    -------
+    output : .npy file
+        The output is given in the form of a .npy file, which can then be later loaded with np.load.
+        The file is indexed such that arr[0,:,:] contains the first trajectory, with arr[0,:,0] containing
+        the sequence of x1 coordinates and arr[0,0,:] containing the x2 coordinates.
+    &#34;&#34;&#34;
     R = self.generate_initial_distribution()
     Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
     Rxs = Rx.reshape((self.Np,self.Np)) # This now contains how many 
@@ -236,21 +400,40 @@ if __name__==&#34;__main__&#34;:
         for k in range(i.get_weight()):
             traj_xs.append(i.get_trajectory())
     
-    np.save(&#34;testtraj.npy&#34;,np.array(traj_xs))</code></pre>
+    np.save(self.output,np.array(traj_xs))</code></pre>
 </details>
 </dd>
 <dt id="bohmian.BohmianSimulation.generate_initial_distribution"><code class="name flex">
 <span>def <span class="ident">generate_initial_distribution</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
+by perusing the rv_discrete documentation</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dist </code></dt>
+<dd>The collection of indices randomly drawn based on the psi distribution, corresponding to initial starting positions.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>Depends on the initial distribution being given, and thus shouldn't be called outside of the class.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def generate_initial_distribution(self):
-    psi_init = self.psis[:,:,0] # The first in the list corresponds to the initial condition.
-    equilibrium = stats.rv_discrete(name=&#39;equilibrium&#39;, values=(np.arange(self.Np*self.Np).reshape((self.Np,self.Np)), np.abs(psi_init)**2*self.dx*self.dx))
+    &#34;&#34;&#34;Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
+    by perusing the rv_discrete documentation
+    
+    Returns
+    -------
+    dist 
+        The collection of indices randomly drawn based on the psi distribution, corresponding to initial starting positions.
+    
+    Notes
+    -----
+    Depends on the initial distribution being given, and thus shouldn&#39;t be called outside of the class.
+    &#34;&#34;&#34;
+    equilibrium = stats.rv_discrete(name=&#39;equilibrium&#39;, values=(np.arange(self.Np*self.Np).reshape((self.Np,self.Np)), np.abs(self.psi0)**2*self.dx*self.dx))
     return equilibrium.rvs(size=self.Ntraj)</code></pre>
 </details>
 </dd>
@@ -261,89 +444,64 @@ if __name__==&#34;__main__&#34;:
 <span>(</span><span>psi0, x, L, coeffs, Nt, dt, startind, weight)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A one-line summary that does not use variable names or the
-function name.</p>
-<p>Several sentences providing an extended description. Refer to
-variables using back-ticks, e.g. <code>var</code>.</p>
+<div class="desc"><p>A class describing a single Bohmian trajectory with a given weight.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>var1</code></strong> :&ensp;<code>array_like</code></dt>
-<dd>Array_like means all those objects &ndash; lists, nested lists, etc. &ndash;
-that can be converted to an array.
-We can also refer to
-variables like <code>var1</code>.</dd>
-<dt><strong><code>var2</code></strong> :&ensp;<code>int</code></dt>
-<dd>The type above can either refer to an actual Python type
-(e.g. <code>int</code>), or describe the type of the variable in more
-detail, e.g. <code>(N,) ndarray</code> or <code>array_like</code>.</dd>
-<dt><strong><code>long_var_name</code></strong> :&ensp;<code>{'hi', 'ho'}</code>, optional</dt>
-<dd>Choices in brackets, default first when optional.</dd>
+<dt><strong><code>psi0</code></strong> :&ensp;<code>2 dimensional complex ndarray</code></dt>
+<dd>The initial wave function to start the simulation from.</dd>
+<dt><strong><code>x</code></strong> :&ensp;<code>1 dimensional double ndarray</code></dt>
+<dd>The grid points for the box along one dimensional. The other dimension is forced to be the same</dd>
+<dt><strong><code>L</code></strong> :&ensp;<code>double</code></dt>
+<dd>Half the length of the box.</dd>
+<dt><strong><code>coeffs</code></strong> :&ensp;<code>2 dimensional complex ndarray</code></dt>
+<dd>The coefficients for the basis expansion of psi.</dd>
+<dt><strong><code>Nt</code></strong> :&ensp;<code>integer</code></dt>
+<dd>Number of timesteps to take</dd>
+<dt><strong><code>dt</code></strong> :&ensp;<code>double</code></dt>
+<dd>Size of the timestep</dd>
+<dt><strong><code>startind</code></strong> :&ensp;<code>integer tuple</code></dt>
+<dd>The starting position index from the x-array.</dd>
+<dt><strong><code>weight</code></strong> :&ensp;<code>integer</code></dt>
+<dd>How many trajectories start from the same index.</dd>
 </dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>type</code></dt>
-<dd>Explanation of anonymous return value of type <code>type</code>.</dd>
-<dt><strong><code>describe</code></strong> :&ensp;<code>type</code></dt>
-<dd>Explanation of return value named <code>describe</code>.</dd>
-<dt><strong><code>out</code></strong> :&ensp;<code>type</code></dt>
-<dd>Explanation of <code>out</code>.</dd>
-<dt><code>type_without_description</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<h2 id="other-parameters">Other Parameters</h2>
-<dl>
-<dt><strong><code>only_seldom_used_keywords</code></strong> :&ensp;<code>type</code></dt>
-<dd>Explanation</dd>
-<dt><strong><code>common_parameters_listed_above</code></strong> :&ensp;<code>type</code></dt>
-<dd>Explanation</dd>
-</dl>
-<p>here's a random docs</p></div>
+<h2 id="notes">Notes</h2>
+<p>The class computes the trajectory only on command; by default, it contains some information about the weight of the trajectory
+(i.e. how many times the particle started in the initial position), the inital wave function and the coefficient required for
+the expansion.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Trajectory():
 
-    r&#34;&#34;&#34;A one-line summary that does not use variable names or the
-    function name.
-
-    Several sentences providing an extended description. Refer to
-    variables using back-ticks, e.g. `var`.
+    &#34;&#34;&#34;A class describing a single Bohmian trajectory with a given weight.
 
     Parameters
     ----------
-    var1 : array_like
-        Array_like means all those objects -- lists, nested lists, etc. --
-        that can be converted to an array.  We can also refer to
-        variables like `var1`.
-    var2 : int
-        The type above can either refer to an actual Python type
-        (e.g. ``int``), or describe the type of the variable in more
-        detail, e.g. ``(N,) ndarray`` or ``array_like``.
-    long_var_name : {&#39;hi&#39;, &#39;ho&#39;}, optional
-        Choices in brackets, default first when optional.
-
-    Returns
-    -------
-    type
-        Explanation of anonymous return value of type ``type``.
-    describe : type
-        Explanation of return value named `describe`.
-    out : type
-        Explanation of `out`.
-    type_without_description
-
-    Other Parameters
-    ----------------
-    only_seldom_used_keywords : type
-        Explanation
-    common_parameters_listed_above : type
-        Explanation
+    psi0 : 2 dimensional complex ndarray
+        The initial wave function to start the simulation from.
+    x : 1 dimensional double ndarray
+        The grid points for the box along one dimensional. The other dimension is forced to be the same
+    L : double
+        Half the length of the box.
+    coeffs : 2 dimensional complex ndarray
+        The coefficients for the basis expansion of psi.
+    Nt : integer
+        Number of timesteps to take
+    dt : double
+        Size of the timestep
+    startind : integer tuple
+        The starting position index from the x-array. 
+    weight : integer
+        How many trajectories start from the same index.
+    
+    Notes
+    -----
+    The class computes the trajectory only on command; by default, it contains some information about the weight of the trajectory
+    (i.e. how many times the particle started in the initial position), the inital wave function and the coefficient required for
+    the expansion. 
     &#34;&#34;&#34;
     def __init__(self, psi0, x, L, coeffs, Nt, dt, startind, weight):
-        &#34;&#34;&#34;
-        here&#39;s a random docs
-        &#34;&#34;&#34;
         self.weight = weight
         self.x = x
         self.pos = np.array([x[startind[0]],x[startind[1]]])
@@ -369,21 +527,52 @@ detail, e.g. <code>(N,) ndarray</code> or <code>array_like</code>.</dd>
         k2 = np.nan_to_num((y_deriv(psi,xcoord,ycoord,self.dx)/psi[xcoord,ycoord]).imag )
         return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
 
-    def euler_step_cython(self,step):
+    def euler_step_cython(self):
+        &#34;&#34;&#34;Take Euler method step in the trajectory calculation.
+
+        Returns
+        -------
+        pos : tuple (double)
+            The new coordinates of the particle in (x1,x2) space.
+
+        &#34;&#34;&#34;
         x1 = self.pos[0]
         x2 = self.pos[1]
         psi = 0
         k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag  )
         k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag )
+        return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
+    
     def compute_trajectory(self):
+        &#34;&#34;&#34;Computes the trajectory for Nt time steps.
+        
+        Notes
+        -----
+        This is an internal function that modifies the trajectory self.traj. That variable contains
+        as a numpy array the positions of the particle at each timestamp.
+        &#34;&#34;&#34;
         for i in range(self.Nt):
             self.pos = self.euler_step(i)
             self.traj.append(np.copy(self.pos))
 
     def get_trajectory(self):
+        &#34;&#34;&#34;Returns the trajectory as a numpy array.
+        
+        Returns
+        -------
+        traj : 2 dimensional ndarray
+            The trajectory.
+        &#34;&#34;&#34;
         return np.array(self.traj)
 
     def get_weight(self):
+        &#34;&#34;&#34;Returns the weight of this trajectory
+        
+        Returns
+        -------
+        weight : integer
+            The weight of the trajectory, i.e. how many times the particle started at this position.
+        &#34;&#34;&#34;
         return self.weight</code></pre>
 </details>
 <h3>Methods</h3>
@@ -392,12 +581,22 @@ detail, e.g. <code>(N,) ndarray</code> or <code>array_like</code>.</dd>
 <span>def <span class="ident">compute_trajectory</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Computes the trajectory for Nt time steps.</p>
+<h2 id="notes">Notes</h2>
+<p>This is an internal function that modifies the trajectory self.traj. That variable contains
+as a numpy array the positions of the particle at each timestamp.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def compute_trajectory(self):
+    &#34;&#34;&#34;Computes the trajectory for Nt time steps.
+    
+    Notes
+    -----
+    This is an internal function that modifies the trajectory self.traj. That variable contains
+    as a numpy array the positions of the particle at each timestamp.
+    &#34;&#34;&#34;
     for i in range(self.Nt):
         self.pos = self.euler_step(i)
         self.traj.append(np.copy(self.pos))</code></pre>
@@ -422,32 +621,58 @@ detail, e.g. <code>(N,) ndarray</code> or <code>array_like</code>.</dd>
 </details>
 </dd>
 <dt id="bohmian.Trajectory.euler_step_cython"><code class="name flex">
-<span>def <span class="ident">euler_step_cython</span></span>(<span>self, step)</span>
+<span>def <span class="ident">euler_step_cython</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Take Euler method step in the trajectory calculation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>pos</code></strong> :&ensp;<code>tuple (double)</code></dt>
+<dd>The new coordinates of the particle in (x1,x2) space.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def euler_step_cython(self,step):
+<pre><code class="python">def euler_step_cython(self):
+    &#34;&#34;&#34;Take Euler method step in the trajectory calculation.
+
+    Returns
+    -------
+    pos : tuple (double)
+        The new coordinates of the particle in (x1,x2) space.
+
+    &#34;&#34;&#34;
     x1 = self.pos[0]
     x2 = self.pos[1]
     psi = 0
     k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag  )
-    k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag )</code></pre>
+    k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag )
+    return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]</code></pre>
 </details>
 </dd>
 <dt id="bohmian.Trajectory.get_trajectory"><code class="name flex">
 <span>def <span class="ident">get_trajectory</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Returns the trajectory as a numpy array.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>traj</code></strong> :&ensp;<code>2 dimensional ndarray</code></dt>
+<dd>The trajectory.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_trajectory(self):
+    &#34;&#34;&#34;Returns the trajectory as a numpy array.
+    
+    Returns
+    -------
+    traj : 2 dimensional ndarray
+        The trajectory.
+    &#34;&#34;&#34;
     return np.array(self.traj)</code></pre>
 </details>
 </dd>
@@ -455,12 +680,24 @@ detail, e.g. <code>(N,) ndarray</code> or <code>array_like</code>.</dd>
 <span>def <span class="ident">get_weight</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Returns the weight of this trajectory</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>weight</code></strong> :&ensp;<code>integer</code></dt>
+<dd>The weight of the trajectory, i.e. how many times the particle started at this position.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_weight(self):
+    &#34;&#34;&#34;Returns the weight of this trajectory
+    
+    Returns
+    -------
+    weight : integer
+        The weight of the trajectory, i.e. how many times the particle started at this position.
+    &#34;&#34;&#34;
     return self.weight</code></pre>
 </details>
 </dd>

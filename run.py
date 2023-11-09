@@ -59,7 +59,7 @@ print("Starting coeffs")
 
 for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
-        bs = ts.basis2d(x,y,L,i,j,Npoints)
+        bs = ts.basis2d(x,L,i,j,Npoints)
         coeffs[i,j] = integral(bs,psi)
     print(i)
 np.savetxt("coeffs_nowall.txt",coeffs)
