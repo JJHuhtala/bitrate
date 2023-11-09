@@ -57,12 +57,12 @@ def E(n1,n2):
 coeffs = np.zeros((num_basis_funcs,num_basis_funcs),dtype=complex)
 print("Starting coeffs")
 
-for i in range(num_basis_funcs):
+"""for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
         bs = ts.basis2d(x,L,i,j,Npoints)
         coeffs[i,j] = integral(bs,psi)
     print(i)
-np.savetxt("coeffs_nowall.txt",coeffs)
+np.savetxt("coeffs_nowall.txt",coeffs)"""
 """
 funbasis = np.zeros((Npoints,Npoints),dtype=complex)
 
@@ -101,8 +101,8 @@ plt.show()"""
 #plt.cla()
 #Animate everything
 
-#bb = BohmianSimulation(ss.get_psis(),x,Np,Nt, dt, Ntraj=10000)
-#bb.calculate_trajectories()
+bb = BohmianSimulation(psi, x, L, 1000, timestep, 100)
+bb.calculate_trajectories()
 
 
 

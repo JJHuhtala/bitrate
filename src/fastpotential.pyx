@@ -134,7 +134,7 @@ def basis2d(double[:] x, double L, int n1, int n2, int N):
     return bs
 
 
-def basis2d_x1deriv(double[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
+def basis2d_x1deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
     """ Spatial derivative with respect to x1 excluding phase.
 
     Parameters
@@ -161,7 +161,8 @@ def basis2d_x1deriv(double[:,:] coeffs, double x1, double x2, double L, Py_ssize
         Derivative of the wave function with respect to x1 at point x1,x2.
     """
     cdef Py_ssize_t i, j
-    cdef double k1,k2, bs
+    cdef double k1,k2
+    cdef complex bs
     bs = 0
     for i in range(n_basis):
         for j in range(n_basis):
@@ -198,7 +199,8 @@ def basis2d_x2deriv(double[:,:] coeffs, double x1, double x2, double L, Py_ssize
         Derivative of the wave function with respect to x1 at point x1,x2.
     """
     cdef Py_ssize_t i, j
-    cdef double k1,k2, bs
+    cdef double k1,k2
+    cdef complex bs
     bs = 0
     for i in range(n_basis):
         for j in range(n_basis):

@@ -83,7 +83,7 @@ class Trajectory():
         as a numpy array the positions of the particle at each timestamp.
         """
         for i in range(self.Nt):
-            self.pos = self.euler_step(i)
+            self.pos = self.euler_step_cython()
             self.traj.append(np.copy(self.pos))
 
     def get_trajectory(self):
@@ -181,7 +181,7 @@ class BohmianSimulation():
         for i in range(len(Rxs[0,:])):
             for j in range(len(Rxs[0,:])):
                 if Rxs[i,j] != 0:
-                    trajectories.append(Trajectory(self.psi0, self.x, self.Nt, self.dt, (i,j),  Rxs[i,j]))
+                    trajectories.append(Trajectory(self.psi0, self.x,self.L, self.coeffs, self.Nt, self.dt, (i,j),  Rxs[i,j]))
 
         print("Number of different trajectories: ", len(trajectories), ", starting calculation..")
         traj_xs = []
