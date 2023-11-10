@@ -3,6 +3,8 @@ cimport numpy as np
 from libc.math cimport abs,pow, sin, cos
 # The functions marked "test" are dummies for using with pytest, as it's desirable to avoid
 # cpdef functions for speed reasons.
+cdef double E(double L, int n1, int n2):
+    return (n1**2+n2**2)*(np.pi**2)/(2*(2*L)**2)
 cdef integral(complex[:,:] fun1, complex[:,:] fun2,Py_ssize_t N, double dx):
     """ Computes the numerical approximation to an integral using the simplest method ("midpoint") for
     a product of two functions.
@@ -134,7 +136,7 @@ def basis2d(double[:] x, double L, int n1, int n2, int N):
     return bs
 
 
-def basis2d_x1deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
+def basis2d_x1deriv(complex[:,:] coeffs, double x1, double x2,double t, double L, Py_ssize_t n_basis):
     """ Spatial derivative with respect to x1 excluding phase.
 
     Parameters
@@ -168,11 +170,11 @@ def basis2d_x1deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssiz
         for j in range(n_basis):
             k1 = np.pi*i/(2*L)
             k2 = np.pi*j/(2*L) 
-            bs += coeffs[i,j] * 1/L * k1*cos(k1*(x1+L))*sin(k2*(x2+L))
+            bs += coeffs[i,j] * 1/L * k1*cos(k1*(x1+L))*sin(k2*(x2+L))*np.exp(-1.0j*E(L,i,j)*t)
 
     return bs
 
-def basis2d_x2deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
+def basis2d_x2deriv(complex[:,:] coeffs, double x1, double x2,double t, double L, Py_ssize_t n_basis):
     """ Spatial derivative with respect to x2 excluding phase.
 
     Parameters
@@ -206,10 +208,10 @@ def basis2d_x2deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssiz
         for j in range(n_basis):
             k1 = np.pi*i/(2*L)
             k2 = np.pi*j/(2*L) 
-            bs += coeffs[i,j] * 1/L * k2*sin(k1*(x1+L))*cos(k2*(x2+L))
+            bs += coeffs[i,j] * 1/L * k2*sin(k1*(x1+L))*cos(k2*(x2+L))*np.exp(-1.0j*E(L,i,j)*t)
     return bs
 
-def psi(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
+def psi(complex[:,:] coeffs, double x1, double x2, double t, double L, Py_ssize_t n_basis):
     """Find value of psi at (x1,x2) by expanding in terms of the basis functions given expansion coefficients.
 
     Parameters
@@ -232,6 +234,6 @@ def psi(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis)
     ps = 0
     for i in range(n_basis):
         for j in range(n_basis):
-            ps += coeffs[i,j]*basisfunc(x1,x2,L,i,j)
+            ps += coeffs[i,j]*basisfunc(x1,x2,L,i,j)*np.exp(-1.0j*E(L,i,j)*t)
 
     return ps

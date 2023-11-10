@@ -58,7 +58,7 @@ class Trajectory():
         k2 = np.nan_to_num((y_deriv(psi,xcoord,ycoord,self.dx)/psi[xcoord,ycoord]).imag )
         return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
 
-    def euler_step_cython(self):
+    def euler_step_cython(self,step):
         """Take Euler method step in the trajectory calculation.
 
         Returns
@@ -69,9 +69,10 @@ class Trajectory():
         """
         x1 = self.pos[0]
         x2 = self.pos[1]
-        psi = fp.psi(self.coeffs, x1,x2,self.L, self.n_basis)
-        k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag  )
-        k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag )
+        t = step*self.dt
+        psi = fp.psi(self.coeffs, x1,x2,t,self.L, self.n_basis)
+        k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag  )
+        k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
         return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
     
     def compute_trajectory(self):
