@@ -3,20 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load presaved trajectories. 
-a = np.load("testtraj.npy")
+a = np.load("trajs.npy")
 print(len(a[0,:,0]))
 flighttimes = []
 print(np.max(a[:,0,0]))
 
 for i in range(len(a)):
     for j in range(len(a[0,:,0])):
-        if a[i,j,0] > 3.0:
+        if a[i,j,0] > 1.0:
             flighttimes.append(0.001*j)
             break
 
 for i in range(len(a)):
     for j in range(len(a[0,:,0])):
-        if a[i,j,1] > 3.0:
+        if a[i,j,1] > 1.0:
             flighttimes.append(0.001*j)
             break
 

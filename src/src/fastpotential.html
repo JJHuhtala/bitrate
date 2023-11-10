@@ -712,7 +712,7 @@ static PyObject *__pyx_pf_13fastpotential_get_norm(CYTHON_UNUSED PyObject *__pyx
 <pre class="cython line score-0">&#xA0;<span class="">090</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">091</span>: <span class="sd">    Returns</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">092</span>: <span class="sd">    -------</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">093</span>: <span class="sd">    Basis function (n1,n2) at opint (x1,x2)</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">093</span>: <span class="sd">    Basis function (n1,n2) at point (x1,x2)</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">094</span>: <span class="sd">    &quot;&quot;&quot;</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">095</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">k1</span><span class="p">,</span><span class="nf">k2</span></pre>
 <pre class="cython line score-34" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">096</span>:     <span class="n">k1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">n1</span><span class="o">/</span><span class="p">(</span><span class="mf">2</span><span class="o">*</span><span class="n">L</span><span class="p">)</span></pre>
@@ -1275,7 +1275,7 @@ static PyObject *__pyx_pf_13fastpotential_4basis2d_x1deriv(CYTHON_UNUSED PyObjec
   __pyx_t_7 = 0;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">174</span>: </pre>
-<pre class="cython line score-99" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">175</span>: <span class="k">def</span> <span class="nf">basis2d_x2deriv</span><span class="p">(</span><span class="n">double</span><span class="p">[:,:]</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">double</span> <span class="n">x1</span><span class="p">,</span> <span class="n">double</span> <span class="n">x2</span><span class="p">,</span> <span class="n">double</span> <span class="n">L</span><span class="p">,</span> <span class="nb">Py_ssize_t</span> <span class="n">n_basis</span><span class="p">):</span></pre>
+<pre class="cython line score-99" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">175</span>: <span class="k">def</span> <span class="nf">basis2d_x2deriv</span><span class="p">(</span><span class="nb">complex</span><span class="p">[:,:]</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">double</span> <span class="n">x1</span><span class="p">,</span> <span class="n">double</span> <span class="n">x2</span><span class="p">,</span> <span class="n">double</span> <span class="n">L</span><span class="p">,</span> <span class="nb">Py_ssize_t</span> <span class="n">n_basis</span><span class="p">):</span></pre>
 <pre class='cython code score-99 '>/* Python wrapper */
 static PyObject *__pyx_pw_13fastpotential_7basis2d_x2deriv(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static char __pyx_doc_13fastpotential_6basis2d_x2deriv[] = " Spatial derivative with respect to x2 excluding phase.\n\n    Parameters\n    ----------\n    coeffs : double 2d ndarray.\n        The coefficient for the basis expansion in terms of particle-in-a-box wave functions.\n    x1 : double\n        The x1 point at which to compute the derivative.\n    x2 : double\n        The x2 point at which to compute the derivative.\n    L : double\n        Half the length of the simulation box.\n    n_basis : Py_ssize_t, positive integer\n        The square root of the number of basis functions.\n    \n    Notes\n    -----\n    Used for trajectory calculations and specialized for 2d. Doesn't include the exponent factor (the phase),\n    that is added in the trajectory; this is for the time-independent part.\n\n    Returns\n    -------\n    bs : double\n        Derivative of the wave function with respect to x1 at point x1,x2.\n    ";
@@ -1351,7 +1351,7 @@ static PyObject *__pyx_pw_13fastpotential_7basis2d_x2deriv(PyObject *__pyx_self,
       values[3] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 3);
       values[4] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 4);
     }
-    __pyx_v_coeffs = <span class='pyx_c_api'>__Pyx_PyObject_to_MemoryviewSlice_dsds_double</span>(values[0], PyBUF_WRITABLE);<span class='error_goto'> if (unlikely(!__pyx_v_coeffs.memview)) __PYX_ERR(0, 175, __pyx_L3_error)</span>
+    __pyx_v_coeffs = <span class='pyx_c_api'>__Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex</span>(values[0], PyBUF_WRITABLE);<span class='error_goto'> if (unlikely(!__pyx_v_coeffs.memview)) __PYX_ERR(0, 175, __pyx_L3_error)</span>
     __pyx_v_x1 = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[1]); if (unlikely((__pyx_v_x1 == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 175, __pyx_L3_error)</span>
     __pyx_v_x2 = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[2]); if (unlikely((__pyx_v_x2 == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 175, __pyx_L3_error)</span>
     __pyx_v_L = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[3]); if (unlikely((__pyx_v_L == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 175, __pyx_L3_error)</span>
@@ -1495,7 +1495,7 @@ static PyObject *__pyx_pf_13fastpotential_6basis2d_x2deriv(CYTHON_UNUSED PyObjec
       __pyx_t_12 = __pyx_v_j;
       if (__pyx_t_11 &lt; 0) __pyx_t_11 += __pyx_v_coeffs.shape[0];
       if (__pyx_t_12 &lt; 0) __pyx_t_12 += __pyx_v_coeffs.shape[1];
-      __pyx_v_bs = __Pyx_c_sum_double(__pyx_v_bs, __pyx_t_double_complex_from_parts(((((((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_coeffs.data + __pyx_t_11 * __pyx_v_coeffs.strides[0]) ) + __pyx_t_12 * __pyx_v_coeffs.strides[1]) ))) * 1.0) / __pyx_v_L) * __pyx_v_k2) * sin((__pyx_v_k1 * (__pyx_v_x1 + __pyx_v_L)))) * cos((__pyx_v_k2 * (__pyx_v_x2 + __pyx_v_L)))), 0));
+      __pyx_v_bs = __Pyx_c_sum_double(__pyx_v_bs, __Pyx_c_prod_double(__Pyx_c_prod_double(__Pyx_c_prod_double(__Pyx_c_quot_double(__Pyx_c_prod_double((*((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_coeffs.data + __pyx_t_11 * __pyx_v_coeffs.strides[0]) ) + __pyx_t_12 * __pyx_v_coeffs.strides[1]) ))), __pyx_t_double_complex_from_parts(1, 0)), __pyx_t_double_complex_from_parts(__pyx_v_L, 0)), __pyx_t_double_complex_from_parts(__pyx_v_k2, 0)), __pyx_t_double_complex_from_parts(sin((__pyx_v_k1 * (__pyx_v_x1 + __pyx_v_L))), 0)), __pyx_t_double_complex_from_parts(cos((__pyx_v_k2 * (__pyx_v_x2 + __pyx_v_L))), 0)));
     }
   }
 </pre><pre class="cython line score-6" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">210</span>:     <span class="k">return</span> <span class="n">bs</span></pre>
@@ -1506,4 +1506,200 @@ static PyObject *__pyx_pf_13fastpotential_6basis2d_x2deriv(CYTHON_UNUSED PyObjec
   __pyx_t_7 = 0;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">211</span>: </pre>
-</div></body></html>
+<pre class="cython line score-100" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">212</span>: <span class="k">def</span> <span class="nf">psi</span><span class="p">(</span><span class="nb">complex</span><span class="p">[:,:]</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">double</span> <span class="n">x1</span><span class="p">,</span> <span class="n">double</span> <span class="n">x2</span><span class="p">,</span> <span class="n">double</span> <span class="n">L</span><span class="p">,</span> <span class="nb">Py_ssize_t</span> <span class="n">n_basis</span><span class="p">):</span></pre>
+<pre class='cython code score-100 '>/* Python wrapper */
+static PyObject *__pyx_pw_13fastpotential_9psi(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_13fastpotential_8psi[] = "Find value of psi at (x1,x2) by expanding in terms of the basis functions given expansion coefficients.\n\n    Parameters\n    ----------\n    x1 : double\n        Coordinate for particle 1\n    x2 : double\n        Coordinate for particle 2\n    L : double\n        HALF the length of the simulation box - the box is from (-L,L).\n    n_basis : Py_ssize_t, positive integer\n        Number of basis functions per particle, i.e. square root of the total number of basis functions.\n\n    Returns\n    -------\n    Value of psi at point (x1,x2) (which is a complex number!)\n    ";
+static PyMethodDef __pyx_mdef_13fastpotential_9psi = {"psi", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13fastpotential_9psi, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13fastpotential_8psi};
+static PyObject *__pyx_pw_13fastpotential_9psi(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_coeffs = { 0, 0, { 0 }, { 0 }, { 0 } };
+  double __pyx_v_x1;
+  double __pyx_v_x2;
+  double __pyx_v_L;
+  Py_ssize_t __pyx_v_n_basis;
+  PyObject *__pyx_r = 0;
+  <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
+  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("psi (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&amp;__pyx_n_s_coeffs,&amp;__pyx_n_s_x1,&amp;__pyx_n_s_x2,&amp;__pyx_n_s_L,&amp;__pyx_n_s_n_basis,0};
+    PyObject* values[5] = {0,0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args);
+      switch (pos_args) {
+        case  5: values[4] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = <span class='py_c_api'>PyDict_Size</span>(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_coeffs)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_x1)) != 0)) kw_args--;
+        else {
+          <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("psi", 1, 5, 5, 1); <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_x2)) != 0)) kw_args--;
+        else {
+          <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("psi", 1, 5, 5, 2); <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_L)) != 0)) kw_args--;
+        else {
+          <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("psi", 1, 5, 5, 3); <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_n_basis)) != 0)) kw_args--;
+        else {
+          <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("psi", 1, 5, 5, 4); <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+        }
+      }
+      if (unlikely(kw_args &gt; 0)) {
+        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "psi") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+      }
+    } else if (<span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args) != 5) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 0);
+      values[1] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 1);
+      values[2] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 2);
+      values[3] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 3);
+      values[4] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 4);
+    }
+    __pyx_v_coeffs = <span class='pyx_c_api'>__Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex</span>(values[0], PyBUF_WRITABLE);<span class='error_goto'> if (unlikely(!__pyx_v_coeffs.memview)) __PYX_ERR(0, 212, __pyx_L3_error)</span>
+    __pyx_v_x1 = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[1]); if (unlikely((__pyx_v_x1 == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+    __pyx_v_x2 = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[2]); if (unlikely((__pyx_v_x2 == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+    __pyx_v_L = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[3]); if (unlikely((__pyx_v_L == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+    __pyx_v_n_basis = <span class='pyx_c_api'>__Pyx_PyIndex_AsSsize_t</span>(values[4]); if (unlikely((__pyx_v_n_basis == (Py_ssize_t)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("psi", 1, 5, 5, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L3_error)</span>
+  __pyx_L3_error:;
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("fastpotential.psi", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_13fastpotential_8psi(__pyx_self, __pyx_v_coeffs, __pyx_v_x1, __pyx_v_x2, __pyx_v_L, __pyx_v_n_basis);
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+
+  /* function exit code */
+  <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_13fastpotential_8psi(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_coeffs, double __pyx_v_x1, double __pyx_v_x2, double __pyx_v_L, Py_ssize_t __pyx_v_n_basis) {
+  __pyx_t_double_complex __pyx_v_ps;
+  Py_ssize_t __pyx_v_i;
+  Py_ssize_t __pyx_v_j;
+  PyObject *__pyx_r = NULL;
+  <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
+  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("psi", 0);
+/* … */
+  /* function exit code */
+  __pyx_L1_error:;
+  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_7);
+  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_11);
+  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_12);
+  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_13);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("fastpotential.psi", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&amp;__pyx_v_coeffs, 1);
+  <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
+  <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
+  return __pyx_r;
+}
+/* … */
+  __pyx_tuple__28 = <span class='py_c_api'>PyTuple_Pack</span>(8, __pyx_n_s_coeffs, __pyx_n_s_x1, __pyx_n_s_x2, __pyx_n_s_L, __pyx_n_s_n_basis, __pyx_n_s_ps, __pyx_n_s_i, __pyx_n_s_j);<span class='error_goto'> if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 212, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_tuple__28);
+  <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_tuple__28);
+/* … */
+  __pyx_t_1 = PyCFunction_NewEx(&amp;__pyx_mdef_13fastpotential_9psi, NULL, __pyx_n_s_fastpotential);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 212, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
+  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_psi, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 212, __pyx_L1_error)</span>
+  <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_codeobj__29 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(5, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_fastpotential_pyx, __pyx_n_s_psi, 212, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 212, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0">&#xA0;<span class="">213</span>: <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find value of psi at (x1,x2) by expanding in terms of the basis functions given expansion coefficients.</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">214</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">215</span>: <span class="sd">    Parameters</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">216</span>: <span class="sd">    ----------</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">217</span>: <span class="sd">    x1 : double</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">218</span>: <span class="sd">        Coordinate for particle 1</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">219</span>: <span class="sd">    x2 : double</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">220</span>: <span class="sd">        Coordinate for particle 2</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">221</span>: <span class="sd">    L : double</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">222</span>: <span class="sd">        HALF the length of the simulation box - the box is from (-L,L).</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">223</span>: <span class="sd">    n_basis : Py_ssize_t, positive integer</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">224</span>: <span class="sd">        Number of basis functions per particle, i.e. square root of the total number of basis functions.</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">225</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">226</span>: <span class="sd">    Returns</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">227</span>: <span class="sd">    -------</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">228</span>: <span class="sd">    Value of psi at point (x1,x2) (which is a complex number!)</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">229</span>: <span class="sd">    &quot;&quot;&quot;</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">230</span>:     <span class="k">cdef</span> <span class="kt">complex</span> <span class="nf">ps</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">231</span>:     <span class="k">cdef</span> <span class="kt">Py_ssize_t</span> <span class="nf">i</span><span class="p">,</span><span class="nf">j</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">232</span>:     <span class="n">ps</span> <span class="o">=</span> <span class="mf">0</span></pre>
+<pre class='cython code score-0 '>  __pyx_v_ps = __pyx_t_double_complex_from_parts(0, 0);
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">233</span>:     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_basis</span><span class="p">):</span></pre>
+<pre class='cython code score-0 '>  __pyx_t_1 = __pyx_v_n_basis;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 &lt; __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_i = __pyx_t_3;
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">234</span>:         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_basis</span><span class="p">):</span></pre>
+<pre class='cython code score-0 '>    __pyx_t_4 = __pyx_v_n_basis;
+    __pyx_t_5 = __pyx_t_4;
+    for (__pyx_t_6 = 0; __pyx_t_6 &lt; __pyx_t_5; __pyx_t_6+=1) {
+      __pyx_v_j = __pyx_t_6;
+</pre><pre class="cython line score-27" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">235</span>:             <span class="n">ps</span> <span class="o">+=</span> <span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">basisfunc</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">L</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span></pre>
+<pre class='cython code score-27 '>      __pyx_t_7 = __pyx_<span class='py_c_api'>PyComplex_FromComplex</span>(__pyx_v_ps);<span class='error_goto'> if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 235, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_7);
+      __pyx_t_8 = __pyx_v_i;
+      __pyx_t_9 = __pyx_v_j;
+      if (__pyx_t_8 &lt; 0) __pyx_t_8 += __pyx_v_coeffs.shape[0];
+      if (__pyx_t_9 &lt; 0) __pyx_t_9 += __pyx_v_coeffs.shape[1];
+      __pyx_t_10 = (*((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_coeffs.data + __pyx_t_8 * __pyx_v_coeffs.strides[0]) ) + __pyx_t_9 * __pyx_v_coeffs.strides[1]) )));
+      __pyx_t_11 = __pyx_<span class='py_c_api'>PyComplex_FromComplex</span>(__pyx_t_10);<span class='error_goto'> if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 235, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_11);
+      __pyx_t_12 = __pyx_f_13fastpotential_basisfunc(__pyx_v_x1, __pyx_v_x2, __pyx_v_L, __pyx_v_i, __pyx_v_j);<span class='error_goto'> if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 235, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_12);
+      __pyx_t_13 = <span class='py_c_api'>PyNumber_Multiply</span>(__pyx_t_11, __pyx_t_12);<span class='error_goto'> if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 235, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_13);
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_11); __pyx_t_11 = 0;
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_12); __pyx_t_12 = 0;
+      __pyx_t_12 = <span class='py_c_api'>PyNumber_InPlaceAdd</span>(__pyx_t_7, __pyx_t_13);<span class='error_goto'> if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 235, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_12);
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_7); __pyx_t_7 = 0;
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_13); __pyx_t_13 = 0;
+      __pyx_t_10 = <span class='pyx_c_api'>__Pyx_PyComplex_As___pyx_t_double_complex</span>(__pyx_t_12);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 235, __pyx_L1_error)</span>
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_12); __pyx_t_12 = 0;
+      __pyx_v_ps = __pyx_t_10;
+    }
+  }
+</pre><pre class="cython line score-0">&#xA0;<span class="">236</span>: </pre>
+<pre class="cython line score-6" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">237</span>:     <span class="k">return</span> <span class="n">ps</span></pre>
+<pre class='cython code score-6 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
+  __pyx_t_12 = __pyx_<span class='py_c_api'>PyComplex_FromComplex</span>(__pyx_v_ps);<span class='error_goto'> if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 237, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_12);
+  __pyx_r = __pyx_t_12;
+  __pyx_t_12 = 0;
+  goto __pyx_L0;
+</pre></div></body></html>

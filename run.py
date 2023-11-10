@@ -101,7 +101,7 @@ plt.show()"""
 #plt.cla()
 #Animate everything
 
-bb = BohmianSimulation(psi, x, L, 1000, timestep, 100)
+bb = BohmianSimulation(psi, x, L, 1000, timestep, 10000)
 bb.calculate_trajectories()
 
 

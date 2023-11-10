@@ -90,7 +90,7 @@ cdef basisfunc(double x1, double x2, double L, int n1, int n2):
 
     Returns
     -------
-    Basis function (n1,n2) at opint (x1,x2)
+    Basis function (n1,n2) at point (x1,x2)
     """
     cdef double k1,k2
     k1 = np.pi*n1/(2*L)
@@ -172,7 +172,7 @@ def basis2d_x1deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssiz
 
     return bs
 
-def basis2d_x2deriv(double[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
+def basis2d_x2deriv(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
     """ Spatial derivative with respect to x2 excluding phase.
 
     Parameters
@@ -209,3 +209,29 @@ def basis2d_x2deriv(double[:,:] coeffs, double x1, double x2, double L, Py_ssize
             bs += coeffs[i,j] * 1/L * k2*sin(k1*(x1+L))*cos(k2*(x2+L))
     return bs
 
+def psi(complex[:,:] coeffs, double x1, double x2, double L, Py_ssize_t n_basis):
+    """Find value of psi at (x1,x2) by expanding in terms of the basis functions given expansion coefficients.
+
+    Parameters
+    ----------
+    x1 : double
+        Coordinate for particle 1
+    x2 : double
+        Coordinate for particle 2
+    L : double
+        HALF the length of the simulation box - the box is from (-L,L).
+    n_basis : Py_ssize_t, positive integer
+        Number of basis functions per particle, i.e. square root of the total number of basis functions.
+
+    Returns
+    -------
+    Value of psi at point (x1,x2) (which is a complex number!)
+    """
+    cdef complex ps
+    cdef Py_ssize_t i,j
+    ps = 0
+    for i in range(n_basis):
+        for j in range(n_basis):
+            ps += coeffs[i,j]*basisfunc(x1,x2,L,i,j)
+
+    return ps

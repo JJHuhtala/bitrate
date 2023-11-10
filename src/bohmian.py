@@ -69,7 +69,7 @@ class Trajectory():
         """
         x1 = self.pos[0]
         x2 = self.pos[1]
-        psi = 0
+        psi = fp.psi(self.coeffs, x1,x2,self.L, self.n_basis)
         k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag  )
         k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, self.L, self.n_basis)/psi).imag )
         return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
@@ -189,6 +189,8 @@ class BohmianSimulation():
             i.compute_trajectory()
             for k in range(i.get_weight()):
                 traj_xs.append(i.get_trajectory())
+            if i%10 == 0:
+                print("Calculated trajectory: ", i)
         
         np.save(self.output,np.array(traj_xs))
 
