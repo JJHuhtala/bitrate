@@ -32,3 +32,4 @@ plt.show()"""
 print(f, np.min(f))
 plt.hist(f,bins=20)
 plt.show()
+

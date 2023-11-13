@@ -71,7 +71,7 @@ class Trajectory():
         x2 = self.pos[1]
         t = step*self.dt
         psi = fp.psi(self.coeffs, x1,x2,t,self.L, self.n_basis)
-        k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag  )
+        k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
         k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
         return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
     
@@ -84,7 +84,7 @@ class Trajectory():
         as a numpy array the positions of the particle at each timestamp.
         """
         for i in range(self.Nt):
-            self.pos = self.euler_step_cython()
+            self.pos = self.euler_step_cython(i)
             self.traj.append(np.copy(self.pos))
 
     def get_trajectory(self):
@@ -147,6 +147,7 @@ class BohmianSimulation():
         self.Nt = Nt
         self.L = L
         self.coeffs = np.loadtxt(coeff_file, dtype=complex)
+        print(np.sum(np.abs(self.coeffs)**2))
         self.output = output
     def generate_initial_distribution(self):
         """Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
@@ -186,13 +187,14 @@ class BohmianSimulation():
 
         print("Number of different trajectories: ", len(trajectories), ", starting calculation..")
         traj_xs = []
+        counter = 0
         for i in trajectories:
             i.compute_trajectory()
             for k in range(i.get_weight()):
                 traj_xs.append(i.get_trajectory())
-            if i%10 == 0:
-                print("Calculated trajectory: ", i)
-        
+            if counter%10 == 0:
+                print("Calculated trajectory: ", counter)
+            counter += 1
         np.save(self.output,np.array(traj_xs))
 
 if __name__=="__main__":

@@ -28,7 +28,7 @@ V[:,100]  = 100.0
 V[100,:]  = 100.0
 num_basis_funcs = 40
 
-for i in range(Npoints):
+"""for i in range(Npoints):
     for j in range(Npoints):
         psi[i,j] = 0.7*Y(x[i],1.0,1.0,np.pi/2,A0)*Y(x[j],1.0,1.0,np.pi/2,A0) + 0.7*Y(x[i],1.0,1.0,np.pi+np.pi/2,A0)*Y(x[j],1.0,1.0,np.pi+np.pi/2,A0)
 
@@ -36,15 +36,8 @@ def psi_cont(x,y):
     return np.abs(0.7*Y(x,1.0,1.0,np.pi/2,A0)*Y(y,1.0,1.0,np.pi/2,A0) + 0.7*Y(x,1.0,1.0,np.pi+np.pi/2,A0)*Y(y,1.0,1.0,np.pi+np.pi/2,A0))**2
 norm = ts.get_norm(psi,Npoints,dx)
 psi = psi/np.sqrt(norm)
-from scipy.stats import rv_continuous
+from scipy.stats import rv_continuous"""
 
-class entangled_gen(rv_continuous):
-
-    "Gaussian distribution"
-
-    def _pdf(self, x,y):
-
-        return psi_cont(x,y)
 #print(norm)
 
 def integral(fun1,fun2):
@@ -56,7 +49,13 @@ def E(n1,n2):
 
 coeffs = np.zeros((num_basis_funcs,num_basis_funcs),dtype=complex)
 print("Starting coeffs")
+coeffs = np.loadtxt("coeffs_nowall.txt", dtype=complex)
+coeffs = coeffs/(np.sum(np.abs(coeffs)**2))
+for i in range(Npoints):
+    for j in range(Npoints):
+        psi[i,j] = ts.psi(coeffs,x[i],x[j],0.00,L,40)
 
+print(np.sum(psi*dx*dx))
 """for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
         bs = ts.basis2d(x,L,i,j,Npoints)
@@ -101,8 +100,8 @@ plt.show()"""
 #plt.cla()
 #Animate everything
 
-bb = BohmianSimulation(psi, x, L, 1000, timestep, 10000)
-bb.calculate_trajectories()
+#bb = BohmianSimulation(psi, x, L, 1000, timestep, 100)
+#bb.calculate_trajectories()
 
 
 
