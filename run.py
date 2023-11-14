@@ -50,12 +50,14 @@ def E(n1,n2):
 coeffs = np.zeros((num_basis_funcs,num_basis_funcs),dtype=complex)
 print("Starting coeffs")
 coeffs = np.loadtxt("coeffs_nowall.txt", dtype=complex)
-coeffs = coeffs/(np.sum(np.abs(coeffs)**2))
+coeffs = coeffs/np.sqrt((np.sum(np.abs(coeffs)**2)))
+
 for i in range(Npoints):
     for j in range(Npoints):
-        psi[i,j] = ts.psi(coeffs,x[i],x[j],0.00,L,40)
+        psi[i,j] = ts.psi(coeffs,x[i],x[j],1.00,L,40)
+    print(i)
 
-print(np.sum(psi*dx*dx))
+print(np.sum(np.abs(psi)**2*dx*dx))
 """for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
         bs = ts.basis2d(x,L,i,j,Npoints)

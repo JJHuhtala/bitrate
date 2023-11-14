@@ -147,7 +147,7 @@ class BohmianSimulation():
         self.Nt = Nt
         self.L = L
         self.coeffs = np.loadtxt(coeff_file, dtype=complex)
-        print(np.sum(np.abs(self.coeffs)**2))
+        self.coeffs = self.coeffs/np.sqrt(np.sum(np.abs(self.coeffs)**2))
         self.output = output
     def generate_initial_distribution(self):
         """Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
