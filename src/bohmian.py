@@ -173,8 +173,8 @@ class BohmianSimulation():
         -------
         output : .npy file
             The output is given in the form of a .npy file, which can then be later loaded with np.load.
-            The file is indexed such that arr[0,:,:] contains the first trajectory, with arr[0,:,0] containing
-            the sequence of x1 coordinates and arr[0,0,:] containing the x2 coordinates.
+            The file is indexed such that arr[0,:,0] contains the first trajectory, with arr[0,:,0] containing
+            the sequence of x1 coordinates and arr[0,:,1] containing the x2 coordinates.
         """
         R = self.generate_initial_distribution()
         Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
