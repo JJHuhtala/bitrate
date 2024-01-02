@@ -78,58 +78,49 @@ plt.imshow(np.abs(funbasis)**2)
 plt.show()
 
 
-#Initial particle position
-custm = stats.rv_discrete(name='custm', values=(np.arange(Npoints*Npoints).reshape((Npoints,Npoints)), np.abs(psi)**2*dx*dx))
-R = custm.rvs(size=1000)
-Rx = np.array([np.count_nonzero(R==y) for y in np.arange(Npoints*Npoints)])
-Rxs = Rx.reshape((Npoints,Npoints))
-#plt.imshow(Rxs)
-cc = 0"""
+"""
+# For getting 50k trajectories with 1000 timesteps:
+#bb = BohmianSimulation(psi, x, L, 1000, timestep, Ntraj=50000,savelast=True)
+#bb.calculate_trajectories()
 
-# Set up figure.
-"""fig, ax = plt.subplots()
-line = ax.imshow(np.abs(psi)**2,cmap='Greys')
-#line = ax.plot(np.imag(psi[]))3
-#line2 = ax.plot(np.real(Y(x,1.0,1.0,np.pi,A0)))
-#print(Y(0.5,1.0,1.0,np.pi,A0))
-plt.xlabel(r'$x_1$')
-plt.ylabel(r'$x_2$')
-textheight = abs(np.max(psi))**2
-plt.title(r'Wave function')
-rk4_steps_per_frame = 4
-plt.show()"""
-#plt.clf()
-#plt.cla()
-#Animate everything
 
-bb = BohmianSimulation(psi, x, L, 1000, timestep, 50000)
+print("Now calculating the eigenvectors and -values with a wall..")
+dx = x[1]-x[0]
+wall = np.zeros(Npoints)
+wall[34] = 1000
+wallm = np.diag(wall)
+Id = np.eye(Npoints)
+kin = np.diag(-2 * np.ones(Npoints)) + np.diag(np.ones(Npoints-1),1) + np.diag(np.ones(Npoints-1),-1)
+kin = kin/(-2*dx*dx)
+Hpot = np.kron(Id,wallm) + np.kron(wallm,Id)
+Hkin = np.kron(Id,kin) + np.kron(kin,Id)
+
+e,vec = np.linalg.eigh(Hpot+Hkin)
+nvec = []
+for i in range(num_basis_funcs*num_basis_funcs):
+    nvec.append(vec[:,i].reshape((Npoints,Npoints)))
+nvec = np.array(nvec)
+
+# Calculating the coefficients for the wall case after 50 timesteps without a wall
+
+print("Calculating psi to nstep = 50")
+for i in range(Npoints):
+    for j in range(Npoints):
+        psi[i,j] = ts.psi(coeffs,x[i],x[j],50*timestep,L,40)
+    print("Iterating over psi: ", i, " out of ", Npoints)
+norm = ts.get_norm(psi,Npoints,dx)
+psi = psi/np.sqrt(norm)
+"""print("Calculated the eigenvectors and values, calculating")
+for i in range(num_basis_funcs):
+    for j in range(num_basis_funcs):
+        bs = vec[:,i*num_basis_funcs+j].reshape((Npoints,Npoints))
+        bs = bs/np.sqrt(np.sum(bs**2*dx*dx))
+        coeffs[i,j] = integral(bs,psi)
+    print("Iterating over coefficients: ", i, " out of ", num_basis_funcs)
+np.savetxt("coeffs_wall_n50.txt",coeffs)"""
+
+# For the appearing wall:
+
+#bb = BohmianSimulation(psi, x, L, 50, timestep, Ntraj=50000,savelast=True)
+bb = BohmianSimulation(psi, x, L, 950, timestep, t0=timestep*50, Ntraj=50000, coeff_file="coeffs_wall_n50.txt", start_from_previous=True, initpos="temp.npy", basis=nvec,energies=e)
 bb.calculate_trajectories()
-
-
-
-# Animation tools not used for now
-
-"""
-def animate(i):
-    global psi
-    for q in range(rk4_steps_per_frame):
-        psinew = update_psi_rk4(psi, timestep)
-        psi = psinew
-
-    #ax.patches = []
-    currentnorm = ts.get_norm(psi,Npoints,dx)
-    #If the norm changes from 1 significantly, the simulation is probably in trouble.
-    print(i,currentnorm)
-    plotted = abs(psi)**2 
-    line.set_data(plotted)  # update the data
-    line.set_clim(vmax=np.amax(np.abs(psi)**2))
-    line.set_clim(vmin=0)
-    return line"""
-"""
-ani = animation.FuncAnimation(fig, animate_2, np.arange(1, 1500), init_func=init,
-                              interval=25, save_count=1500)
-#plt.show()
-FFwriter=animation.FFMpegWriter(fps=60, extra_args=['-vcodec', 'libx264'])
-ani.save('psiresonance.mp4', writer = FFwriter)
-"""
-#plt.show()

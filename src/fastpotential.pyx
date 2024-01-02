@@ -237,3 +237,13 @@ def psi(complex[:,:] coeffs, double x1, double x2, double t, double L, Py_ssize_
             ps += coeffs[i,j]*basisfunc(x1,x2,L,i,j)*np.exp(-1.0j*E(L,i,j)*t)
 
     return ps
+
+def psiwall(double[:,:,:] vecs, double[:] e, complex[:,:] coeffs, int x1, int x2, double t, Py_ssize_t n_basis):
+    cdef complex ps
+    cdef Py_ssize_t i,j
+    ps = 0
+    for i in range(n_basis):
+        for j in range(n_basis):
+            ps += coeffs[i,j]*vecs[i*n_basis+j,x1,x2]*np.exp(-1.0j*e[i*n_basis+j]*t)
+
+    return ps

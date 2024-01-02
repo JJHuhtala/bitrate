@@ -32,10 +32,14 @@ class Trajectory():
     (i.e. how many times the particle started in the initial position), the inital wave function and the coefficient required for
     the expansion. 
     """
-    def __init__(self, psi0, x, L, coeffs, Nt, dt, startind, weight):
+    def __init__(self, psi0, x, L, coeffs, Nt, dt, startind, weight, start_from_previous=False, initpos=[], t0=0, basis=[],energies=[]):
         self.weight = weight
         self.x = x
-        self.pos = np.array([x[startind[0]],x[startind[1]]])
+        if not start_from_previous:
+            self.pos = np.array([x[startind[0]],x[startind[1]]])
+        else:
+            assert len(initpos)>0
+            self.pos = np.array(initpos)
         self.dx = self.x[1]-self.x[0]
         self.dt = dt
         self.psi0 = psi0
@@ -44,11 +48,10 @@ class Trajectory():
         self.L = L
         self.coeffs = coeffs
         self.n_basis = len(coeffs[:,0])
-    def plot_xs(self):
-        """this is a description of the plot thing."""
-        ntraj = np.array(self.traj)
-        print(np.max(ntraj[:,0]))
-        print(ntraj[:,0])
+        self.t0=t0
+        self.basis = basis 
+        self.energies=energies
+        self.start_from_previous=start_from_previous
     
     def euler_step(self,step):
         xcoord = find_nearest(self.x,self.pos[0])
@@ -69,11 +72,25 @@ class Trajectory():
         """
         x1 = self.pos[0]
         x2 = self.pos[1]
-        t = step*self.dt
-        psi = fp.psi(self.coeffs, x1,x2,t,self.L, self.n_basis)
-        k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
-        k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
-        return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
+        t = step*self.dt#+self.t0
+        if self.start_from_previous:
+            x1ind = find_nearest(self.x,x1)
+            x2ind = find_nearest(self.x,x2)
+            x1pind = (x1ind+1)%len(self.x)
+            x2pind = (x2ind+1)%len(self.x)
+
+            psi = fp.psiwall(self.basis,self.energies,self.coeffs,x1ind,x2ind,t, self.n_basis)
+            psix1 = fp.psiwall(self.basis,self.energies,self.coeffs,x1pind,x2ind,t, self.n_basis)
+            psix2 = fp.psiwall(self.basis,self.energies,self.coeffs,x1ind,x2pind,t, self.n_basis)
+            k1 = np.nan_to_num(((psix1-psi)/(self.dx*psi)).imag)
+            k2 = np.nan_to_num(((psix2-psi)/(self.dx*psi)).imag)
+            return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
+        else:
+            psi = fp.psi(self.coeffs, x1,x2,t,self.L, self.n_basis)
+            k1 = np.nan_to_num( (fp.basis2d_x1deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
+            k2 = np.nan_to_num( (fp.basis2d_x2deriv(self.coeffs, x1, x2, t, self.L, self.n_basis)/psi).imag )
+            return [self.pos[0] + self.dt * k1, self.pos[1] + self.dt * k2]
+        
     
     def compute_trajectory(self):
         """Computes the trajectory for Nt time steps.
@@ -130,6 +147,16 @@ class BohmianSimulation():
         The .txt file containing the coefficients for the basis expansion of psi.
     output : string
         The output file, in to which the trajectories are dumped as a numpy array (which can be loaded with np.load).
+    start_from_previous : bool
+        Do we start from a previously obtained position of particles, i.e. some collection of particle positions?
+    savelast : bool
+        Do we want to save the last positions of the particle for a future continuation?
+    initpos : string
+        File containing initial positions of particles in case start_from_previous is true.
+    basis : 2 dimensional complex array
+        Contains the basis functions, in case we are starting from a previous position.
+    energies : 1 dimensional double array
+        Contains the energy eigenvalues in case we are starting from a previous position.
     
     Notes
     -----
@@ -137,7 +164,8 @@ class BohmianSimulation():
     to binning the end result distribution, so you might as well do it beforehand. This saves some computation,
     as trajectories starting at the same point need to only be calculated once.
     """
-    def __init__(self,psi0, x, L, Nt, dt, Ntraj = 1000, coeff_file="coeffs_nowall.txt", output="trajs.npy"):
+    def __init__(self,psi0, x, L, Nt, dt, t0=0, Ntraj = 1000, coeff_file="coeffs_nowall.txt", output="trajs.npy", start_from_previous=False, savelast=False, initpos="NONE",
+                 basis=[],energies=[]):
         self.psi0 = psi0
         self.Np = len(x)
         self.x = x
@@ -149,6 +177,12 @@ class BohmianSimulation():
         self.coeffs = np.loadtxt(coeff_file, dtype=complex)
         self.coeffs = self.coeffs/np.sqrt(np.sum(np.abs(self.coeffs)**2))
         self.output = output
+        self.start_from_previous = start_from_previous
+        self.initpos=initpos
+        self.savelast=savelast
+        self.t0=t0
+        self.basis = basis
+        self.energies = energies
     def generate_initial_distribution(self):
         """Generates the initial distribution of indices in the psi0 array. Looks a bit confusing, but easily understood
         by perusing the rv_discrete documentation
@@ -176,26 +210,41 @@ class BohmianSimulation():
             The file is indexed such that arr[0,:,0] contains the first trajectory, with arr[0,:,0] containing
             the sequence of x1 coordinates and arr[0,:,1] containing the x2 coordinates.
         """
-        R = self.generate_initial_distribution()
-        Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
-        Rxs = Rx.reshape((self.Np,self.Np)) # This now contains how many 
         trajectories = []
-        for i in range(len(Rxs[0,:])):
-            for j in range(len(Rxs[0,:])):
-                if Rxs[i,j] != 0:
-                    trajectories.append(Trajectory(self.psi0, self.x,self.L, self.coeffs, self.Nt, self.dt, (i,j),  Rxs[i,j]))
+        final_pos = []
+        if not self.start_from_previous:
+            print("Drawing from an initial psi distribution...")
+            R = self.generate_initial_distribution()
+            Rx = np.array([np.count_nonzero(R==y) for y in np.arange(self.Np*self.Np)])
+            Rxs = Rx.reshape((self.Np,self.Np)) # This now contains how many 
+            for i in range(len(Rxs[0,:])):
+                for j in range(len(Rxs[0,:])):
+                    if Rxs[i,j] != 0:
+                        trajectories.append(Trajectory(self.psi0, self.x,self.L, self.coeffs, self.Nt, self.dt, (i,j),  Rxs[i,j]))
+        else:
+            ip = np.load(self.initpos)
+            print("Starting from previous positions.. ")
+            for i in range(len(ip)):
+                print(ip[i,2])
+                trajectories.append(Trajectory(self.psi0, self.x,self.L, self.coeffs, self.Nt, self.dt, (0,0),  ip[i,2],initpos=ip[i,:2],t0=self.t0,
+                                               basis=self.basis,energies=self.energies,start_from_previous=True))
 
         print("Number of different trajectories: ", len(trajectories), ", starting calculation..")
         traj_xs = []
         counter = 0
         for i in trajectories:
             i.compute_trajectory()
-            for k in range(i.get_weight()):
+            if self.savelast:
+                final_pos.append([i.get_trajectory()[-1][0],i.get_trajectory()[-1][1],i.get_weight()])
+            for k in range(int(i.get_weight())):
                 traj_xs.append(i.get_trajectory())
+                
             if counter%10 == 0:
                 print("Calculated trajectory: ", counter)
             counter += 1
         np.save(self.output,np.array(traj_xs))
+        if self.savelast:
+            np.save("temp.npy",np.array(final_pos))
 
 if __name__=="__main__":
     pass
