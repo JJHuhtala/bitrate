@@ -1,3 +1,7 @@
 traj nowall 50k results:
 
-Average:  1.6873782483799855 Standard deviation:  0.28001190152951433
+Average:  1.6873609559071021 Standard deviation:  0.2765588460438473
+
+wall
+
+Average:  2.464117367417234 Standard deviation:  0.4508593277566832

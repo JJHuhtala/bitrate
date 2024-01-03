@@ -26,7 +26,7 @@ V         = np.zeros((Npoints,Npoints),dtype=np.cdouble)
 A0        = 5/2
 #V[:,100]  = 100.0
 #V[100,:]  = 100.0
-num_basis_funcs = 40
+num_basis_funcs = 100
 
 for i in range(Npoints):
     for j in range(Npoints):
@@ -80,7 +80,7 @@ plt.show()
 
 """
 # For getting 50k trajectories with 1000 timesteps:
-#bb = BohmianSimulation(psi, x, L, 1000, timestep, Ntraj=50000,savelast=True)
+#bb = BohmianSimulation(psi, x, L, 1000, timestep, Ntraj=50000, savelast=True)
 #bb.calculate_trajectories()
 
 
@@ -103,21 +103,37 @@ nvec = np.array(nvec)
 
 # Calculating the coefficients for the wall case after 50 timesteps without a wall
 
-print("Calculating psi to nstep = 50")
+"""print("Calculating psi to nstep = 50")
 for i in range(Npoints):
     for j in range(Npoints):
         psi[i,j] = ts.psi(coeffs,x[i],x[j],50*timestep,L,40)
     print("Iterating over psi: ", i, " out of ", Npoints)
-norm = ts.get_norm(psi,Npoints,dx)
-psi = psi/np.sqrt(norm)
-"""print("Calculated the eigenvectors and values, calculating")
+
+print("Calculated the eigenvectors and values, calculating")
+coeffs = np.zeros((num_basis_funcs,num_basis_funcs))
 for i in range(num_basis_funcs):
     for j in range(num_basis_funcs):
-        bs = vec[:,i*num_basis_funcs+j].reshape((Npoints,Npoints))
+        bs = nvec[i*num_basis_funcs + j]
         bs = bs/np.sqrt(np.sum(bs**2*dx*dx))
         coeffs[i,j] = integral(bs,psi)
     print("Iterating over coefficients: ", i, " out of ", num_basis_funcs)
-np.savetxt("coeffs_wall_n50.txt",coeffs)"""
+np.savetxt("coeffs_wall_n50.txt",coeffs)
+norm = ts.get_norm(psi,Npoints,dx)
+psi = psi/np.sqrt(norm)"""
+"""coeffs = np.loadtxt("coeffs_wall_n50.txt", dtype=complex)
+coeffs = coeffs/np.sqrt(np.sum(np.abs(coeffs)**2))"""
+"""
+for i in range(Npoints):
+    print("comp iter, ", i)
+    for j in range(Npoints):
+        print("yo")
+        psi[i,j] = ts.psiwall(nvec,e,coeffs,i,j,0,num_basis_funcs)
+        print("eh")
+    print("Computing psi, iteration ", i)
+print("here we are")
+plt.imshow(np.abs(psi)**2)
+plt.show()"""
+
 
 # For the appearing wall:
 
